@@ -38,7 +38,7 @@ saturn_logs/
 saturn_ser/
 
 # Visualisation
-wisteria-wiz/
+wisteria-server/
 experiments/output/*
 
 # Jots
