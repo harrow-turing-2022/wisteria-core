@@ -103,12 +103,8 @@ end
 
 
 function loadLinks(fpath::AbstractString, pm::Pageman; backwards::Bool=false)
-
-    if backwards
-        links = Vector{Pair{Int32, Int32}}[[] for _ = 1:pm.totalpages]
-    else
-        links = Vector{Pair{Int32, Int32}}[]
-    end
+    
+    links = Vector{Pair{Int32, Int32}}[[] for _ = 1:pm.totalpages]
 
     open(fpath, "r") do f
         counter::Int32 = 1
@@ -121,8 +117,6 @@ function loadLinks(fpath::AbstractString, pm::Pageman; backwards::Bool=false)
         for c in ProgressBar(readeach(f, Int32))
             if newline
                 @assert c == counter "File is corrupted (counter error): counter is $(counter), file is $(c)"
-
-                push!(links, [])
                 target = true
                 newline = false
                 
