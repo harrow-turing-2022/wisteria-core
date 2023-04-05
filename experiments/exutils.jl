@@ -25,7 +25,7 @@ function countlinks(wg::Wikigraph)
     countIDs = Int32[]
 
     for srcID in ProgressBar(1:wg.pm.totalpages)
-        if wg.pm.redirs[srcID] == srcID
+        if notRedir(wg.pm, srcID)
             push!(countIDs, srcID)
             push!(counts, length(wg.links[srcID]))
         end
@@ -38,7 +38,7 @@ function countIsolated(wg::Wikigraph)
     isolated = Int32[]
 
     for srcID in ProgressBar(1:wg.pm.totalpages)
-        if wg.pm.redirs[srcID] == srcID && length(wg.links[srcID] == 0)
+        if notRedir(wg.pm, srcID) && length(wg.links[srcID] == 0)
             push!(isolated, srcID)
         end
     end

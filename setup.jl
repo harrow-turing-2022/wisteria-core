@@ -41,6 +41,11 @@ end
 uninstalled = String[]
 checkInstall!(uninstalled, "curl", `curl -V`)
 checkInstall!(uninstalled, "curl", `7z`)
+checkInstall!(uninstalled, "Python (for PyPlot)", `python --version`)
+
+if "Python (for PyPlot)" ∉ uninstalled
+    run(`pip install matplotlib`)
+end
 
 if length(uninstalled) > 0
     error("❌ The following commands are not available: $(uninstalled)\n")

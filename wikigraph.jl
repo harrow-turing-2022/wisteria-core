@@ -81,9 +81,9 @@ function toEdgeTxt(
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if wg.pm.redirs[srcID] == srcID     # not a redirect
+            if notRedir(wg.pm, srcID)
                 for (_trgID, w) in wg.links[srcID]
-                    trgID = wg.pm.redirs[_trgID]
+                    trgID = traceRedir!(wg.pm, _trgID)
                     if uniformWeight
                         write(f, "$(son)$(srcID)$(delim)$(son)$(trgID)$(eol)")
                     else 
@@ -108,7 +108,7 @@ function toTitleTxt(
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if wg.pm.redirs[srcID] == srcID     # not a redirect
+            if notRedir(wg.pm, srcID)
                 write(f, "$(son)$(srcID)$(delim)$(wg.pm.id2title[srcID])$(eol)")
             end
         end
@@ -129,9 +129,9 @@ function toNCOL(
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if wg.pm.redirs[srcID] == srcID     # not a redirect
+            if notRedir(wg.pm, srcID)
                 for (_trgID, w) in wg.links[srcID]
-                    trgID = wg.pm.redirs[_trgID]
+                    trgID = traceRedir!(wg.pm, _trgID)
 
                     if (srcID in wg.links[trgID]) && srcID < trgID
                         continue
@@ -164,12 +164,12 @@ function toLGL(
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if wg.pm.redirs[srcID] == srcID    # not a redirect
+            if notRedir(wg.pm, srcID)
 
                 write(f, "# $(son)$(srcID)$(eol)")
 
                 for (_trgID, w) in wg.links[srcID]
-                    trgID = wg.pm.redirs[_trgID]
+                    trgID = traceRedir!(wg.pm, _trgID)
 
                     if (srcID in wg.links[trgID]) && srcID < trgID
                         continue
@@ -208,9 +208,9 @@ function toCosmo(
         end
 
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if wg.pm.redirs[srcID] == srcID     # not a redirect
+            if notRedir(wg.pm, srcID)
                 for (_trgID, w) in wg.links[srcID]
-                    trgID = wg.pm.redirs[_trgID]
+                    trgID = traceRedir!(wg.pm, _trgID)
 
                     if uniformWeight
                         write(f, "$(son)$(srcID)$(delim)$(son)$(trgID)$(eol)")

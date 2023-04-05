@@ -25,7 +25,6 @@ function normalise(title::String)
     return replace(uppercasefirst(strip(title)), " " => "_")
 end
 
-
 # Page management
 
 mutable struct Pageman
@@ -42,6 +41,42 @@ mutable struct Pageman
         rds = [i for i = 1:npg]
         return new(fpath, id2tt, tt2id, rds, npg, npg)
     end
+end
+
+function isRedir(
+        pm::Pageman,
+        id::Integer
+    )
+    return pm.redirs[id] != pm.redirs[id]
+end
+
+function notRedir(
+        pm::Pageman,
+        id::Integer
+    )
+    return pm.redirs[id] == pm.redirs[id]
+end
+
+function traceRedir!(
+        pm::Pageman,
+        id::Integer
+    )
+    intermediates = []
+    red = pm.redirs[id]
+    next = pm.redirs[red]
+
+    while red != next
+        push!(intermediates, red)
+        red = pm.redirs[next]
+        next = pm.redirs[red]
+    end
+
+    pm.redirs[id] = red
+    for i in intermediates
+        pm.redirs[i] = red
+    end
+
+    return red
 end
 
 function tie(
@@ -90,7 +125,7 @@ function saveLinks(
             write(f, i)
             written = Int32[]
             for (t, w) in links[i]
-                r = pm.redirs[t]
+                r = traceRedir!(pm, t)
                 if !(r in written)
                     write(f, r, w, Int32(0))
                     push!(written, r)
@@ -134,7 +169,7 @@ function loadLinks(fpath::AbstractString, pm::Pageman; backwards::Bool=false)
             elseif weight
                 @assert c >= 0 "File is corrupted (weight <= 0)"
                 
-                trg = pm.redirs[cache]
+                trg = traceRedir!(pm, cache)
                 if backwards
                     counter ∉ links[trg] && push!(links[trg], counter => c)
                 else

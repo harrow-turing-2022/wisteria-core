@@ -85,6 +85,7 @@ To load a Wikigraph:
 
 ```julia
 # Include wisteria graph loading functions
+include("utils.jl")
 include("wikigraph.jl")
 
 # Load a Wikigraph object
@@ -132,7 +133,7 @@ linked = Int32[]
 for (id, weight) in wg.links[1]
 
     # Handle redirected pages
-    redirected_id = wg.pm.redirs[id]
+    redirected_id = traceRedir!(wg.pm, id)
 
     # Check if ID is already linked
     if !(redirected_id in linked)
