@@ -46,6 +46,7 @@ for i = start:length(files)
         dunzip(zipname)
     end
     
+    # Loads wg from `graph/`, mines XML to update wg, and saves it back into `graph`
     wg = mineXML(
         "data/$(xmlname)",
         "graph/",

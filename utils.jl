@@ -133,11 +133,12 @@ function loadLinks(fpath::AbstractString, pm::Pageman; backwards::Bool=false)
             
             elseif weight
                 @assert c >= 0 "File is corrupted (weight <= 0)"
-
+                
+                trg = pm.redirs[cache]
                 if backwards
-                    push!(links[cache], counter => c)
+                    counter in links[trg] && push!(links[trg], counter => c)
                 else
-                    push!(links[counter], cache => c)
+                    trg in links[counter] && push!(links[counter], trg => c)
                 end
                 
                 delim = true
