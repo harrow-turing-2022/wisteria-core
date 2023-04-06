@@ -134,7 +134,6 @@ function toEdgeTxt(
         for srcID in ProgressBar(1:wg.pm.totalpages)
             if notRedir(wg.pm, srcID)
                 for trgID in wg.links[srcID]
-                    trgID = traceRedir!(wg.pm, _trgID)
                     write(f, "$(son)$(srcID)$(delim)$(son)$(trgID)$(eol)")
                 end
             end
