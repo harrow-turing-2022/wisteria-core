@@ -190,3 +190,62 @@ function loadLinks(fpath::AbstractString, pm::Pageman; backwards::Bool=false)
     return links
 
 end
+
+
+function saveLinksQuick(
+        fpath::AbstractString,
+        links::Vector{Vector{Pair{Int32, Int32}}}
+    )
+
+    if ispath(fpath)
+        rm(fpath)
+    end
+
+    open(fpath, "a") do f
+        for i::Int32 in ProgressBar(eachindex(links))
+            for (t, w) in links[i]
+                write(f, t)
+            end
+            write(f, Int32(0))
+        end
+    end
+end
+
+
+function saveLinksQuick(
+        fpath::AbstractString,
+        links::Vector{Vector{Int32}}
+    )
+
+    if ispath(fpath)
+        rm(fpath)
+    end
+
+    open(fpath, "a") do f
+        for i::Int32 in ProgressBar(eachindex(links))
+            for t in links[i]
+                write(f, t)
+            end
+            write(f, Int32(0))
+        end
+    end
+end
+
+
+function loadLinksQuick(fpath::AbstractString)
+    links = Vector{Int32}[]
+
+    open(fpath, "r") do f
+        counter::Int32 = 1
+        
+        for c in ProgressBar(readeach(f, Int32))
+            if c == 0
+                counter += 1
+            else
+                push!(links[counter], trg)
+            end
+        end
+    end
+
+    return links
+end
