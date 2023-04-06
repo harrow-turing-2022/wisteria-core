@@ -119,6 +119,29 @@ function toEdgeTxt(
     end
 end
 
+function toEdgeTxt(
+        fpath::AbstractString,
+        wg::WikigraphUnweighed;
+        son="",
+        delim="\t",
+        eol="\n"
+    )
+    if ispath(fpath)
+        rm(fpath)
+    end
+
+    open(fpath, "a") do f
+        for srcID in ProgressBar(1:wg.pm.totalpages)
+            if notRedir(wg.pm, srcID)
+                for trgID in wg.links[srcID]
+                    trgID = traceRedir!(wg.pm, _trgID)
+                    write(f, "$(son)$(srcID)$(delim)$(son)$(trgID)$(eol)")
+                end
+            end
+        end
+    end
+end
+
 function toTitleTxt(
         fpath::AbstractString,
         wg::Wikigraph;
