@@ -54,9 +54,11 @@ for i = start:length(files)
         "logs/$(i)/title_errors.txt",
         numpages
     )
+    savewgQuick("graph/", wg)
 
     rm("data/$(xmlname)")
 end
 
 bwg = loadwg("graph/", "data/enwiki-20230101-all-titles-in-ns0"; backwards=true)
 savewg("backgraph/", bwg)
+savewgQuick("backgraph/", bwg)

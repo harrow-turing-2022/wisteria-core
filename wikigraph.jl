@@ -33,6 +33,11 @@ mutable struct Wikigraph
     end
 end
 
+mutable struct WikigraphUnweighed
+    pm::Pageman
+    links::Vector{Vector{Int32}}
+end
+
 function link(
         wg::Wikigraph,
         srcID::Integer,
@@ -65,6 +70,25 @@ end
 
 function wgIntegrity(fdir::AbstractString)
     return ispath(joinpath(fdir, "pm.jld2")) && ispath(joinpath(fdir, "links.ria"))
+end
+
+function savewgQuick(
+        fdir::AbstractString,
+        wg::Wikigraph
+    )
+    if !ispath(fdir) 
+        mkpath(fdir)
+    end
+    if !ispath(joinpath(fdir, "pm.jld2"))
+        savepm(joinpath(fdir, "pm.jld2"), wg.pm)
+    end
+    saveLinksQuick(joinpath(fdir, "links.qria"), wg.links)
+end
+
+function loadwgQuick(fdir::AbstractString, titlesPath::AbstractString)
+    pm = loadpm(joinpath(fdir, "pm.jld2"), titlesPath)
+    links = loadLinksQuick(joinpath(fdir, "links.qria"))
+    return WikigraphUnweighed(pm, links)
 end
 
 function toEdgeTxt(

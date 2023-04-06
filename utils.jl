@@ -233,16 +233,17 @@ end
 
 
 function loadLinksQuick(fpath::AbstractString)
-    links = Vector{Int32}[]
+    links = Vector{Int32}[[]]
 
     open(fpath, "r") do f
         counter::Int32 = 1
-        
+
         for c in ProgressBar(readeach(f, Int32))
             if c == 0
                 counter += 1
+                push!(links, [])
             else
-                push!(links[counter], trg)
+                push!(links[counter], c)
             end
         end
     end
