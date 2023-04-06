@@ -79,8 +79,8 @@ function pageAnalysis(wg, isoPath, name)
 end
 
 
-fwg = loadwg("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
+fwg = loadwgQuick("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
 pageAnalysis(fwg, "output/fwdIsolated.txt", "Outbound Graph")
 
-bwg = loadwg("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
+bwg = loadwgQuick("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
 pageAnalysis(bwg, "output/bwdIsolated.txt", "Inbound Graph")

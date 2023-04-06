@@ -23,12 +23,12 @@ include("exutils.jl")
 include("indices.jl")
 
 
-function expandBFS(wg, source; maxSeparation=Inf, verbose=false)
+function expandBFS(wg::WikigraphUnweighed, source::Integer; maxSeparation=Inf, verbose=false)
     s = 0
     r = 0
     explored = Int32[]
     separations = Int32[]
-    frontier = Int32[t for (t, _) in wg.links[source]]
+    frontier = wg.links[source]
 
     while length(frontier) > 0 && s < maxSeparation
         newFrontier = Int32[]
@@ -47,7 +47,7 @@ function expandBFS(wg, source; maxSeparation=Inf, verbose=false)
             if !(id in explored)
                 push!(explored, id)
                 push!(separations, s + 1)
-                append!(newFrontier, [t for (t, _) in wg.links[id]])
+                append!(newFrontier, wg.links[id])
             end
         end
 
@@ -73,11 +73,11 @@ function retrace(source, target, parents)
 end
 
 
-function connectBFS(wg, source, target; verbose=false)
+function connectBFS(wg::WikigraphUnweighed, source::Integer, target::Integer; verbose=false)
     s = 1
     explored = Int32[]
-    frontier = Int32[t for (t, _) in wg.links[source]]
-    parents = Dict{Int32, Int32}(t => source for (t, _) in wg.links[source])
+    frontier = wg.links[source]
+    parents = Dict{Int32, Int32}(t => source for t in wg.links[source])
 
     if length(frontier) == 0
         return (Inf, [])
@@ -101,7 +101,7 @@ function connectBFS(wg, source, target; verbose=false)
                 return (s, retrace(source, target, parents))
             elseif id ∉ explored
                 push!(explored, id)
-                for (t, _) in wg.links[id]
+                for t in wg.links[id]
                     if t ∉ explored
                         push!(newFrontier, t)
                         if !haskey(parents, t)
@@ -120,7 +120,7 @@ function connectBFS(wg, source, target; verbose=false)
 end
 
 
-function race(wg, startTitle, endTitle; verbose=false)
+function race(wg::WikigraphUnweighed, startTitle::AbstractString, endTitle::AbstractString; verbose=false)
     startID = wg.pm.title2id[startTitle]
     endID = wg.pm.title2id[endTitle]
     deg, path = connectBFS(wg, startID, endID, verbose=verbose)
@@ -135,7 +135,7 @@ norm(x) = join([isletter(x[i]) ? x[i] : '_' for i in eachindex(x)])
 
 
 function reachability(
-        wg, source, rwg;
+        wg::WikigraphUnweighed, source::Integer, rwg::Union{Wikigraph, WikigraphUnweighed};
         maxSeparation=Inf, verbose=false, ysc="log", yfontsz=10, dpi=1000, color="forestgreen"
     )
     explored, separations, s, r = expandBFS(wg, source; maxSeparation=maxSeparation, verbose=verbose)
@@ -159,9 +159,9 @@ function reachability(
 end
 
 
-fwg = loadwg("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
+fwg = loadwgQuick("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
 fwdCounts, fwdCountIDs = countlinks(fwg)
-bwg = loadwg("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
+bwg = loadwgQuick("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
 bwdCounts, bwdCountIDs = countlinks(bwg)
 
 philID = fwg.pm.title2id["Philosophy"]

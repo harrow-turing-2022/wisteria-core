@@ -20,7 +20,7 @@ using Statistics
 include("../wikigraph.jl")
 
 
-function countlinks(wg::Wikigraph)
+function countlinks(wg::Union{Wikigraph, WikigraphUnweighed})
     counts = Int32[]
     countIDs = Int32[]
 
@@ -34,7 +34,7 @@ function countlinks(wg::Wikigraph)
     return counts, countIDs
 end
 
-function countIsolated(wg::Wikigraph)
+function countIsolated(wg::Union{Wikigraph, WikigraphUnweighed})
     isolated = Int32[]
 
     for srcID in ProgressBar(1:wg.pm.totalpages)

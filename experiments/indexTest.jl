@@ -21,9 +21,9 @@ include("exutils.jl")
 include("../wikigraph.jl")
 include("indices.jl")
 
-fwg = loadwg("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
+fwg = loadwgquick("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
 fwdCounts, fwdCountIDs = countlinks(fwg)
-bwg = loadwg("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
+bwg = loadwgQuick("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
 bwdCounts, bwdCountIDs = countlinks(bwg)
 
 

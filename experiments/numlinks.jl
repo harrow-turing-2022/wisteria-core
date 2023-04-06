@@ -64,13 +64,13 @@ function scat(
     cla()
 end
 
-fwg = loadwg("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
+fwg = loadwgQuick("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
 fwdCounts, fwdCountIDs = countlinks(fwg)
 fwdNZCounts = [i for i in fwdCounts if i != 0]
 logHistogram(fwdNZCounts, 1000, "output/outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
 logHistogramScaled(fwdNZCounts, 1000, "output/scaled_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
 
-bwg = loadwg("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
+bwg = loadwgQuick("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
 bwdCounts, bwdCountIDs = countlinks(bwg)
 bwdNZCounts = [i for i in bwdCounts if i != 0]
 logHistogram(bwdNZCounts, 1000, "output/indegree.png", "Distribution of Indegree over Pages with Indegree > 0")
