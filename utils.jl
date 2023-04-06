@@ -171,9 +171,9 @@ function loadLinks(fpath::AbstractString, pm::Pageman; backwards::Bool=false)
                 
                 trg = traceRedir!(pm, cache)
                 if backwards
-                    counter ∉ links[trg] && push!(links[trg], counter => c)
+                    (counter => c) ∉ links[trg] && push!(links[trg], counter => c)
                 else
-                    trg ∉ links[counter] && push!(links[counter], trg => c)
+                    (trg => c) ∉ links[counter] && push!(links[counter], trg => c)
                 end
                 
                 delim = true
