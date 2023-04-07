@@ -202,6 +202,50 @@ function reachability(
 end
 
 
+function bidirectionalBFS(fwg::WikigraphUnweighed, bwg::WikigraphUnweighed, source::Integer)
+    explored = Set{Int32}()
+    frontier = Set(fwg.links[source]) ∪ Set(bwg.links[source])
+
+    while length(frontier) > 0
+        newFrontier = Int32[]
+
+        for id in frontier
+            append!(newFrontier, fwg.links[id])
+            append!(newFrontier, bwg.links[id])
+        end
+        union!(explored, frontier)
+
+        frontier = Set(newFrontier)
+        setdiff!(frontier, explored)
+    end
+
+    union!(explored, frontier)
+    return explored
+end
+
+
+function findIslands()
+    islands = Dict{String, Set{Int32}}()
+    allExplored = Set{Int32}()
+    iter = ProgressBar(sortperm(bwdCounts; rev=true))
+
+    for idx in iter
+        srcID = bwdCountIDs[idx]
+        (srcID in allExplored || isRedir(fwg.pm, srcID)) && (continue)
+        
+        explored = bidirectionalBFS(fwg, bwg, srcID)
+        union!(allExplored, explored)
+
+        islands[fwg.pm.id2title[srcID]] = explored
+
+        progress = length(allExplored) * 100 / fwg.pm.numpages
+        set_postfix(iter, progress="$(round(progress; digits=2))  %Wikipedia")
+    end
+
+    return islands
+end
+
+
 philID = fwg.pm.title2id["Philosophy"]
 reachability(fwg, philID, length(bwdNZCounts); printEach=true, graph=true, type="Forward")
 reachability(bwg, philID, length(fwdNZCounts); printEach=true, graph=true, type="Backward")
@@ -221,3 +265,14 @@ for (rank, id) in enumerate(bwdCountIDs[argmaxk(bwdCounts, k)])
     println("\n> Top $(rank): $(ttl) <")
     reachability(bwg, id, length(fwdNZCounts); maxSeparation=1, verbose=false)
 end
+
+islands = findIslands()
+cnt = 0
+for (k, s) in islands
+    sz = length(s)
+    if sz > 0
+        cnt += 1
+        println("$(k) : $(sz)")
+    end
+end
+println("> $(cnt) non-zero islands in total")
