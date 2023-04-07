@@ -47,14 +47,14 @@ function isRedir(
         pm::Pageman,
         id::Integer
     )
-    return pm.redirs[id] != pm.redirs[id]
+    return pm.redirs[id] != id
 end
 
 function notRedir(
         pm::Pageman,
         id::Integer
     )
-    return pm.redirs[id] == pm.redirs[id]
+    return pm.redirs[id] == id
 end
 
 function traceRedir!(
