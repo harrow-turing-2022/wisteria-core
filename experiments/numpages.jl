@@ -16,8 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 =#
 
 
-using ProgressBars
-include("../wikigraph.jl")
+include("common.jl")
 
 
 function pageAnalysis(wg, isoPath, name)
@@ -78,9 +77,25 @@ function pageAnalysis(wg, isoPath, name)
     end
 end
 
-
-fwg = loadwgQuick("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
 pageAnalysis(fwg, "output/fwdIsolated.txt", "Outbound Graph")
-
-bwg = loadwgQuick("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
 pageAnalysis(bwg, "output/bwdIsolated.txt", "Inbound Graph")
+
+if ispath("output/fwdTop1000.txt")
+    rm("output/fwdTop1000.txt")
+end
+
+open("output/fwdTop1000.txt", "a") do f
+    for (rank, id) in enumerate(fwdCountIDs[argmaxk(fwdCounts, 1000)])
+        write(f, "$(rank) $(fwg.pm.id2title[id])\n")
+    end
+end
+
+if ispath("output/bwdTop1000.txt")
+    rm("output/bwdTop1000.txt")
+end
+
+open("output/bwdTop1000.txt", "a") do f
+    for (rank, id) in enumerate(bwdCountIDs[argmaxk(bwdCounts, 1000)])
+        write(f, "$(rank) $(bwg.pm.id2title[id])\n")
+    end
+end

@@ -16,10 +16,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 =#
 
 
-using PyPlot
+include("common.jl")
 
-include("exutils.jl")
-include("../wikigraph.jl")
 
 function logHistogram(
         data, bins, fname, ttl; 
@@ -64,15 +62,10 @@ function scat(
     cla()
 end
 
-fwg = loadwgQuick("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
-fwdCounts, fwdCountIDs = countlinks(fwg)
-fwdNZCounts = [i for i in fwdCounts if i != 0]
+
 logHistogram(fwdNZCounts, 1000, "output/outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
 logHistogramScaled(fwdNZCounts, 1000, "output/scaled_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
 
-bwg = loadwgQuick("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
-bwdCounts, bwdCountIDs = countlinks(bwg)
-bwdNZCounts = [i for i in bwdCounts if i != 0]
 logHistogram(bwdNZCounts, 1000, "output/indegree.png", "Distribution of Indegree over Pages with Indegree > 0")
 logHistogramScaled(bwdNZCounts, 1000, "output/scaled_indegree.png", "Distribution of Indegree over Pages with Indegree > 0")
 
@@ -83,7 +76,14 @@ analyse(fwdNZCounts, "Non-Zero Outdegrees")
 analyse(bwdCounts, "Indegrees")
 analyse(bwdNZCounts, "Non-Zero Indegrees")
 
-E = sum(fwdCounts)
-V = length(fwdCounts)
-density = sum(fwdCounts) / (V * (V - 1))
-print("Density of Wikipedia links: $(density)")
+fwdE = sum(fwdCounts)
+fwdV = length(fwdCounts)
+fwdDensity = fwdE / (fwdV * (fwdV - 1))
+print("Outbound Graph: E = $(fwdE) | V = $(fwdV)")
+print("Density of outbound links: $(fwdDensity)")
+
+bwdE = sum(bwdCounts)
+bwdV = length(bwdCounts)
+bwdDensity = bwdE / (bwdV * (bwdV - 1))
+print("Inbound Graph: E = $(bwdE) | V = $(bwdV)")
+print("Density of inbound links: $(bwdDensity)")

@@ -16,46 +16,64 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 =#
 
 
-using PyPlot
-using ProgressBars
-include("../wikigraph.jl")
-include("exutils.jl")
-include("indices.jl")
+include("common.jl")
 
 
-function expandBFS(wg::WikigraphUnweighed, source::Integer; maxSeparation=Inf, verbose=false)
-    s = 0
+function expandBFS(wg::WikigraphUnweighed, source::Integer; 
+    maxSeparation=Inf, verbose=false, printEach=false, nzCount=0)
+
+    s = 1
     r = 0
-    explored = Int32[]
+    explored = Set{Int32}()
     separations = Int32[]
-    frontier = wg.links[source]
+    frontier = Set(wg.links[source])
+    push!(separations, length(frontier))
+    
+    if printEach
+        ttl = wg.pm.id2title[source]
+        numReached = length(frontier)
+        println("At $(s) degrees of separation $(ttl) reaches:")
+        println("| $(numReached) articles")
+        println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia pages")
+        println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia pages")
+    end
 
     while length(frontier) > 0 && s < maxSeparation
         newFrontier = Int32[]
 
         if verbose
-            println("Expanding nodes of separation $(s)")
-        end
-
-        if verbose
+            println("Expanding nodes of separation $(s+1)")
             iter = ProgressBar(frontier)
         else
             iter = frontier
         end
 
         for id in iter
-            if !(id in explored)
-                push!(explored, id)
-                push!(separations, s + 1)
-                append!(newFrontier, wg.links[id])
-            end
+            append!(newFrontier, wg.links[id])
+        end
+        union!(explored, frontier)
+
+        frontier = Set(newFrontier)
+        setdiff!(frontier, explored)
+        r = length(frontier)
+        
+        if r == 0
+            break
         end
 
         s += 1
-        frontier = newFrontier
-        r = length(newFrontier)
+        push!(separations, r)
+
+        if printEach
+            numReached = length(explored) + r
+            println("At $(s) degrees of separation $(ttl) reaches:")
+            println("| $(numReached) articles")
+            println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia pages")
+            println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia pages")
+        end
     end
 
+    union!(explored, frontier)
     return (explored, separations, s, r)
 end
 
@@ -76,44 +94,40 @@ end
 function connectBFS(wg::WikigraphUnweighed, source::Integer, target::Integer; verbose=false)
     s = 1
     explored = Int32[]
-    frontier = wg.links[source]
+    frontier = Set(wg.links[source])
     parents = Dict{Int32, Int32}(t => source for t in wg.links[source])
 
     if length(frontier) == 0
         return (Inf, [])
+    elseif source == target
+        return (0, [])
     end
 
     while length(frontier) > 0
+        if target in frontier
+            return (s, retrace(source, target, parents))
+        end
+
         newFrontier = Int32[]
 
         if verbose
-            println("Expanding nodes of separation $(s)")
-        end
-
-        if verbose
+            println("Expanding nodes of separation $(s+1)")
             iter = ProgressBar(frontier)
         else
             iter = frontier
         end
 
         for id in iter
-            if id == target
-                return (s, retrace(source, target, parents))
-            elseif id ∉ explored
-                push!(explored, id)
-                for t in wg.links[id]
-                    if t ∉ explored
-                        push!(newFrontier, t)
-                        if !haskey(parents, t)
-                            parents[t] = id
-                        end
-                    end
-                end
+            append!(newFrontier, wg.links[id])
+            for t in wg.links[id]
+                (haskey(parents, t)) || (parents[t] = id)
             end
         end
+        union!(explored, frontier)
 
         s += 1
-        frontier = newFrontier
+        frontier = Set(newFrontier)
+        setdiff!(frontier, explored)
     end
 
     return (Inf, [])
@@ -121,9 +135,17 @@ end
 
 
 function race(wg::WikigraphUnweighed, startTitle::AbstractString, endTitle::AbstractString; verbose=false)
+    @assert haskey(wg.pm.title2id, startTitle) "Start title $(startTitle) does not exist"
+    @assert haskey(wg.pm.title2id, endTitle) "End title $(endTitle) does not exist"
+
     startID = wg.pm.title2id[startTitle]
     endID = wg.pm.title2id[endTitle]
+
+    @assert notRedir(wg.pm, startID) "Start title $(startTitle) is a redirected page"
+    @assert notRedir(wg.pm, endID) "End title $(endTitle) is a redirected page"
+
     deg, path = connectBFS(wg, startID, endID, verbose=verbose)
+
     println("Degree $(deg) separation:")
     for id in path
         println(wg.pm.id2title[id])
@@ -135,42 +157,54 @@ norm(x) = join([isletter(x[i]) ? x[i] : '_' for i in eachindex(x)])
 
 
 function reachability(
-        wg::WikigraphUnweighed, source::Integer, rwg::Union{Wikigraph, WikigraphUnweighed};
-        maxSeparation=Inf, verbose=false, ysc="log", yfontsz=10, dpi=1000, color="forestgreen"
+        wg::WikigraphUnweighed, source::Integer, nzCount; maxSeparation=Inf, verbose=false, printEach=false,
+        graph=false, type="", yfontsz=10, dpi=1000, color="forestgreen"
     )
-    explored, separations, s, r = expandBFS(wg, source; maxSeparation=maxSeparation, verbose=verbose)
-    numReached = length(explored)
 
+    (type == "") || (type = type * " ")
     ttl = wg.pm.id2title[source]
-    nzCount = length([i for i in countlinks(rwg)[1] if i != 0])
 
-    println("At $(s) degrees of separation and wth $(r) remaining pages to expand, $(ttl) reaches:")
-    println("| $(numReached) articles")
-    println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia pages")
-    println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia pages")
+    explored, separations, s, _ = expandBFS(wg, source;
+        maxSeparation=maxSeparation, verbose=verbose, printEach=printEach, nzCount=nzCount)
+    
+    if !printEach
+        numReached = length(explored)
+        println("At $(s) degrees of separation $(ttl) reaches:")
+        println("| $(numReached) articles")
+        println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia pages")
+        println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia pages")
+    end
+    
+    if graph
+        bar([i for i = 1:s], separations, color=color)
+        yscale("log")
+        title("$(type)BFS expansion of $(ttl)")
+        xlabel("Degree of separation")
+        ylabel("Number of new pages reached", fontsize=yfontsz)
+        savefig("output/bfsDif_$(norm(ttl))_deg$(s).png", dpi=dpi)
+        cla()
+        
+        cumseps = cumsum(separations)
+        plot([i for i = 1:s], cumseps, color=color)
+        title("$(type)BFS expansion of $(ttl)")
+        xlabel("Degree of separation")
+        ylabel("Number of pages reached", fontsize=yfontsz)
+        savefig("output/bfsCum_$(norm(ttl))_deg$(s).png", dpi=dpi)
+        cla()
 
-    hist(separations, bins=s, color=color)
-    yscale(ysc)
-    title("BFS expansion of $(ttl)")
-    xlabel("Degree of separation")
-    ylabel("Number of new pages reached", fontsize=yfontsz)
-    savefig("output/bfs_$(norm(ttl))_deg$(s).png", dpi=dpi)
-    cla()
+        plot([i for i = 1:s], cumseps / nzCount, color=color)
+        title("$(type)BFS expansion of $(ttl)")
+        xlabel("Degree of separation")
+        ylabel("Number of pages reached (fraction of reachable)", fontsize=yfontsz)
+        savefig("output/bfsCumScaled_$(norm(ttl))_deg$(s).png", dpi=dpi)
+        cla()
+    end
 end
 
 
-fwg = loadwgQuick("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
-fwdCounts, fwdCountIDs = countlinks(fwg)
-bwg = loadwgQuick("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
-bwdCounts, bwdCountIDs = countlinks(bwg)
-
 philID = fwg.pm.title2id["Philosophy"]
-reachability(fwg, philID, bwg; maxSeparation=1, verbose=true)
-reachability(fwg, philID, bwg; maxSeparation=2, verbose=true)
-
-reachability(bwg, philID, fwg; maxSeparation=1, verbose=true)
-reachability(bwg, philID, fwg; maxSeparation=2, verbose=true)
-reachability(bwg, philID, fwg; maxSeparation=3, verbose=true)
+reachability(fwg, philID, length(bwdNZCounts); printEach=true, graph=true, type="Forward")
+reachability(bwg, philID, length(fwdNZCounts); printEach=true, graph=true, type="Backward")
 
 k = 10
 
@@ -178,32 +212,12 @@ println("\nOutbound expansion")
 for (rank, id) in enumerate(fwdCountIDs[argmaxk(fwdCounts, k)])
     ttl = fwg.pm.id2title[id]
     println("\n> Top $(rank): $(ttl) <")
-    reachability(fwg, id, bwg; maxSeparation=1, verbose=false)
+    reachability(fwg, id, length(bwdNZCounts); maxSeparation=1, verbose=false)
 end
 
 println("\nInbound expansion")
 for (rank, id) in enumerate(bwdCountIDs[argmaxk(bwdCounts, k)])
     ttl = bwg.pm.id2title[id]
     println("\n> Top $(rank): $(ttl) <")
-    reachability(bwg, id, fwg; maxSeparation=1, verbose=false)
-end
-
-if ispath("output/fwdTop1000.txt")
-    rm("output/fwdTop1000.txt")
-end
-
-open("output/fwdTop1000.txt", "a") do f
-    for (rank, id) in enumerate(fwdCountIDs[argmaxk(fwdCounts, 1000)])
-        write(f, "$(rank) $(fwg.pm.id2title[id])\n")
-    end
-end
-
-if ispath("output/bwdTop1000.txt")
-    rm("output/bwdTop1000.txt")
-end
-
-open("output/bwdTop1000.txt", "a") do f
-    for (rank, id) in enumerate(bwdCountIDs[argmaxk(bwdCounts, 1000)])
-        write(f, "$(rank) $(bwg.pm.id2title[id])\n")
-    end
+    reachability(bwg, id, length(fwdNZCounts); maxSeparation=1, verbose=false)
 end

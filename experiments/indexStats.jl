@@ -16,18 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 =#
 
 
-using Statistics
-using Distributions
-using Pingouin
-include("exutils.jl")
-include("../wikigraph.jl")
-include("indices.jl")
-
-
-fwg = loadwgQuick("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
-fwdCounts, fwdCountIDs = countlinks(fwg)
-bwg = loadwgQuick("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
-bwdCounts, bwdCountIDs = countlinks(bwg)
+include("common.jl")
 
 
 function runfunc(func, id)
