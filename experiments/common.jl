@@ -17,7 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 using PyPlot
+using Pingouin
+using Statistics
 using ProgressBars
+using Distributions
 
 include("../wikigraph.jl")
 include("exutils.jl")
