@@ -17,7 +17,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 import Pkg
-Pkg.add(["EzXML", "FileIO", "JLD2", "ProgressBars", "PyPlot", "Pingouin", "Distributions", "Genie"])
+Pkg.add(["EzXML", "FileIO", "JLD2", "ProgressBars", "PyPlot", "Pingouin", 
+         "Distributions", "DataStructures", "Genie"])
 println("✅ All Julia packages installed")
 
 safemake(dir) = !ispath(dir) && mkdir(dir)
