@@ -21,6 +21,7 @@ using Pingouin
 using Statistics
 using ProgressBars
 using Distributions
+using DataStructures
 
 include("../wikigraph.jl")
 include("exutils.jl")
