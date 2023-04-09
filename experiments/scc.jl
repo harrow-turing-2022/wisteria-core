@@ -66,13 +66,9 @@ function tarjan(wg::WikigraphUnweighed)
             (v in onStack) && (lowLinks[u] = min(lowLinks[u], times[v]))
         end
 
-        if lowLinks[u] == times[u]
-            createScc(u)
-        end
+        (lowLinks[u] == times[u]) && createScc(u)
 
-        if u == src
-            return 0, false
-        end
+        (u == src) && (return 0, false)
         
         return parents[u], false
     end
@@ -101,3 +97,13 @@ function tarjan(wg::WikigraphUnweighed)
 end
 
 scc = tarjan(fwg)
+sizes = [length(i) for i in scc]
+maxSz = maximum(sizes)
+maxIdx = argmax(sizes)
+
+checkfile("output/scc$(maxIdx)_$(maxSz).txt")
+open("output/scc$(maxIdx)_$(maxSz).txt", "a") do f
+    for id in scc[maxIdx]
+        write(f, fwg.pm.id2title[id], "\n")
+    end
+end
