@@ -25,6 +25,8 @@ function normalise(title::String)
     return replace(uppercasefirst(strip(title)), " " => "_")
 end
 
+checkfile(f) = ispath(f) && rm(f)
+
 # Page management
 
 mutable struct Pageman
@@ -116,9 +118,7 @@ function saveLinks(
         pm::Pageman
     )
 
-    if ispath(fpath)
-        rm(fpath)
-    end
+    checkfile(fpath)
 
     open(fpath, "a") do f
         for i::Int32 in ProgressBar(eachindex(links))
@@ -197,9 +197,7 @@ function saveLinksQuick(
         links::Vector{Vector{Pair{Int32, Int32}}}
     )
 
-    if ispath(fpath)
-        rm(fpath)
-    end
+    checkfile(fpath)
 
     open(fpath, "a") do f
         for i::Int32 in ProgressBar(eachindex(links))
@@ -217,9 +215,7 @@ function saveLinksQuick(
         links::Vector{Vector{Int32}}
     )
 
-    if ispath(fpath)
-        rm(fpath)
-    end
+    checkfile(fpath)
 
     open(fpath, "a") do f
         for i::Int32 in ProgressBar(eachindex(links))

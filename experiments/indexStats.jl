@@ -69,10 +69,7 @@ end
 function writeMaxK(func, k, fname)
     data = [runfunc(func, i) for i in fwdCountIDs]
 
-    if ispath(fname)
-        rm(fname)
-    end
-    
+    checkfile(fname)
     open(fname, "a") do f
         for (rank, i) in enumerate(argmaxk(data, k))
             id = fwdCountIDs[i]
@@ -86,10 +83,7 @@ end
 function writeMinK(func, k, fname)
     data = [runfunc(func, i) for i in fwdCountIDs]
 
-    if ispath(fname)
-        rm(fname)
-    end
-    
+    checkfile(fname)
     open(fname, "a") do f
         for (rank, i) in enumerate(argmink(data, k))
             id = fwdCountIDs[i]
@@ -115,10 +109,7 @@ function writeSample(
     )
     data = [runfunc(func, fwg.pm.title2id[t]) for t in samp]
 
-    if ispath(fname)
-        rm(fname)
-    end
-    
+    checkfile(fname)
     open(fname, "a") do f
         for i in sortperm(data)
             ttl = samp[i]

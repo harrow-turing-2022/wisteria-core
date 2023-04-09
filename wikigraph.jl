@@ -99,9 +99,7 @@ function toEdgeTxt(
         delim="\t",
         eol="\n"
     )
-    if ispath(fpath)
-        rm(fpath)
-    end
+    checkfile(fpath)
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
@@ -126,9 +124,7 @@ function toEdgeTxt(
         delim="\t",
         eol="\n"
     )
-    if ispath(fpath)
-        rm(fpath)
-    end
+    checkfile(fpath)
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
@@ -148,9 +144,7 @@ function toTitleTxt(
         delim="\t",
         eol="\n"
     )
-    if ispath(fpath)
-        rm(fpath)
-    end
+    checkfile(fpath)
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
@@ -169,9 +163,7 @@ function toNCOL(
         delim=" ",
         eol="\n"
     )
-    if ispath(fpath)
-        rm(fpath)
-    end
+    checkfile(fpath)
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
@@ -204,9 +196,7 @@ function toLGL(
         delim=" ",
         eol="\n"
     )
-    if ispath(fpath)
-        rm(fpath)
-    end
+    checkfile(fpath)
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
@@ -242,9 +232,7 @@ function toCosmo(
         delim=";",
         eol="\n"
     )
-    if ispath(fpath)
-        rm(fpath)
-    end
+    checkfile(fpath)
 
     open(fpath, "a") do f
         if uniformWeight

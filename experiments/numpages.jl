@@ -20,9 +20,7 @@ include("common.jl")
 
 
 function pageAnalysis(wg, isoPath, name)
-    if ispath(isoPath)
-        rm(isoPath)
-    end
+    checkfile(isoPath)
 
     open(isoPath, "a") do f
         redirCount = 0
@@ -80,20 +78,14 @@ end
 pageAnalysis(fwg, "output/fwdIsolated.txt", "Outbound Graph")
 pageAnalysis(bwg, "output/bwdIsolated.txt", "Inbound Graph")
 
-if ispath("output/fwdTop1000.txt")
-    rm("output/fwdTop1000.txt")
-end
-
+checkfile("output/fwdTop1000.txt")
 open("output/fwdTop1000.txt", "a") do f
     for (rank, id) in enumerate(fwdCountIDs[argmaxk(fwdCounts, 1000)])
         write(f, "$(rank) $(fwg.pm.id2title[id])\n")
     end
 end
 
-if ispath("output/bwdTop1000.txt")
-    rm("output/bwdTop1000.txt")
-end
-
+checkfile("output/bwdTop1000.txt")
 open("output/bwdTop1000.txt", "a") do f
     for (rank, id) in enumerate(bwdCountIDs[argmaxk(bwdCounts, 1000)])
         write(f, "$(rank) $(bwg.pm.id2title[id])\n")
