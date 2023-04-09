@@ -19,36 +19,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 include("common.jl")
 
 
-function tarjan(wg::WikigraphUnweighed)
+function dfs(wg::WikigraphUnweighed)
     t = 0
-    stack = Stack{Int32}()
-
-    times = Int32[0 for _ = 1:wg.pm.totalpages]
-    lowLinks = Int32[0 for _ = 1:wg.pm.totalpages]
+    lens = [length(i) for i in wg.links]
+    
     parents = Int32[0 for _ = 1:wg.pm.totalpages]
     positions = Int32[0 for _ = 1:wg.pm.totalpages]
-    lens = [length(i) for i in wg.links]
-
-    onStack = Set{Int32}()
-    scc = Set{Int32}[]
+    reachables = Set{Int32}[Set{Int32}() for _ = 1:wg.pm.totalpages]
 
     function init(u)
         t += 1
         times[u] = t
-        lowLinks[u] = t
-        push!(stack, u)
-        push!(onStack, u)
-    end
-
-    function createScc(u)
-        component = Set{Int32}()
-        while (v = pop!(stack)) != u
-            pop!(onStack, v)
-            push!(component, v)
-        end
-        pop!(onStack, u)
-        push!(component, u)
-        push!(scc, component)
     end
 
     function next(u, src)
@@ -95,35 +76,3 @@ function tarjan(wg::WikigraphUnweighed)
 
     return scc
 end
-
-scc = tarjan(fwg)
-sizes = [length(i) for i in scc]
-maxSz = maximum(sizes)
-maxIdx = argmax(sizes)
-
-checkfile("output/scc$(maxIdx)_$(maxSz).txt")
-open("output/scc$(maxIdx)_$(maxSz).txt", "a") do f
-    for id in scc[maxIdx]
-        write(f, fwg.pm.id2title[id], "\n")
-    end
-end
-
-isolated = Set{Int32}([i for i = 1:fwg.pm.totalpages if notRedir(fwg.pm, i) && length(fwg.links[i]) == 0])
-initialComps = Set{Int32}()
-for i in scc
-    if length(i) == 1
-        union!(initialComps, i)
-    else
-        break
-    end
-end
-
-x = [i for i = 1:maxSz]
-y = [0 for i = 1:maxSz]
-for sz in sizes
-    y[sz] += 1
-end
-plot(x, y)
-yscale("log")
-xscale("log")
-title("Analysis of ")
