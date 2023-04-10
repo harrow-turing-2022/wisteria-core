@@ -107,27 +107,73 @@ function initFrontier!(frontier::Set{Int32}, explored::Set{Int32},
     setdiff!(frontier, overlap)
 end
 
-function bfs!(wg::WikigraphUnweighed, source::Integer, cache::Dict{Int32, Set{Int32}})
-    cached = Set(keys(cache))
-    explored = Set{Int32}([source])
-    frontier = Set(wg.links[source])
-    initFrontier!(frontier, explored, cache, cached)
 
-    while length(frontier) > 0
+function expandBFS(wg::WikigraphUnweighed, source::Integer; 
+    maxSeparation=Inf, verbose=false, printEach=false, nzCount=0)
+
+    s = 1
+    r = 0
+    explored = Set{Int32}([source])
+    separations = Int32[]
+    frontier = Set(wg.links[source])
+    push!(separations, length(frontier))
+    
+    if printEach
+        ttl = wg.pm.id2title[source]
+        numReached = length(frontier)
+        println("At $(s) degrees of separation $(ttl) reaches:")
+        println("| $(numReached) articles")
+        println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia pages")
+        println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia pages")
+    end
+
+    while length(frontier) > 0 && s < maxSeparation
         newFrontier = Int32[]
 
-        for id in frontier
+        if verbose
+            println("Expanding nodes of separation $(s+1)")
+            iter = ProgressBar(frontier)
+        else
+            iter = frontier
+        end
+
+        for id in iter
             append!(newFrontier, wg.links[id])
         end
         union!(explored, frontier)
 
         frontier = Set(newFrontier)
-        initFrontier!(frontier, explored, cache, cached)
+        setdiff!(frontier, explored)
+        r = length(frontier)
+        
+        if r == 0
+            break
+        end
+
+        s += 1
+        push!(separations, r)
+
+        if printEach
+            numReached = length(explored) + r
+            println("At $(s) degrees of separation $(ttl) reaches:")
+            println("| $(numReached) articles")
+            println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia pages")
+            println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia pages")
+        end
     end
 
     union!(explored, frontier)
-    cache[source] = explored
-    return explored
+    return (explored, separations, s, r)
+end
+
+
+function writeSCC(idx, sz)
+    checkfile("output/scc$(idx)_$(sz).txt")
+    open("output/scc$(idx)_$(sz).txt", "a") do f
+        for id in scc[idx]
+            write(f, fwg.pm.id2title[id], "\n")
+        end
+    end
 end
 
 
@@ -135,16 +181,7 @@ scc = tarjan(fwg)
 sizes = [length(i) for i in scc]
 maxSz = maximum(sizes)
 maxIdx = argmax(sizes)
-println("Biggest SCC is codenamed the *$(fwg.pm.id2title[collect(scc[maxIdx])[1]]) cluster*")
-
-
-checkfile("output/scc$(maxIdx)_$(maxSz).txt")
-open("output/scc$(maxIdx)_$(maxSz).txt", "a") do f
-    for id in scc[maxIdx]
-        write(f, fwg.pm.id2title[id], "\n")
-    end
-end
-
+println("Biggest SCC is codenamed the *$(fwg.pm.id2title[collect(scc[maxIdx])[begin]]) cluster*")
 
 isolated = Set{Int32}([i for i = 1:fwg.pm.totalpages if notRedir(fwg.pm, i) && length(fwg.links[i]) == 0])
 initialComps = Set{Int32}()
@@ -162,9 +199,16 @@ println("Length of isolated pages in forward Wikigraph: $(length(isolated))")
 x = sort(collect(Set(sizes)))
 y = [count(i->i==sz, sizes) for sz in x]
 
-println("SCC size\tCount\t% Wikipedia covered in (each) SCC")
+println("SCC size\tCount\t% Wikipedia covered in (each) SCC\t[codename]")
 for (sz, cnt) in zip(x, y)
-    println("$(sz)\t$(cnt)\t$(sz * 100 / fwg.pm.numpages)")
+    if cnt == 1
+        idx = findfirst(==(sz), sizes)
+        print("$(sz)\t$(cnt)\t$(sz * 100 / fwg.pm.numpages)\t")
+        println(fwg.pm.id2title[collect(scc[idx])[begin]])
+        writeSCC(idx, sz)
+    else
+        println("$(sz)\t$(cnt)\t$(sz * 100 / fwg.pm.numpages)")
+    end
 end
 
 scatter(x, y, s=2, marker=".")
@@ -186,12 +230,22 @@ savefig("output/scc_count_line.png", dpi=1000)
 cla()
 
 
-#=
 selects = [collect(i)[begin] for i in scc]
 
-fwdCache = Dict{Int32, Set{Int32}}()
-fwdReachables = [length(bfs!(fwg, i, fwdCache)) for i in ProgressBar(selects)]
+fwdSrc = 0
+for i in reverse(selects)
+    if length(fwg.links[i]) > 0
+        fwdSrc = i
+        break
+    end
+end
+expandBFS(fwg, fwdSrc; printEach=true, nzCount=length(bwdNZCounts))
 
-bwdCache = Dict{Int32, Set{Int32}}()
-bwdReachables = [length(bfs!(bwg, i, bwdCache)) for i in ProgressBar(reverse(selects))]
-#=
+bwdSrc = 0
+for i in selects
+    if length(bwg.links[i]) > 0
+        bwdSrc = i
+        break
+    end
+end
+expandBFS(bwg, bwdSrc; printEach=true, nzCount=length(fwdNZCounts))
