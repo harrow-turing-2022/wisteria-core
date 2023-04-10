@@ -42,7 +42,7 @@ function graphfunc(
 
     if approx
         D = fit_mle(dist, data)
-        x = LinRange(b[1], b[end], 1000)
+        x = LinRange(b[begin], b[end], 1000)
         y = [pdf(D, i) for i in x]
         plot(x, y, color="green")
     end

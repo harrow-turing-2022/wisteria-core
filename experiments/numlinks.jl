@@ -32,6 +32,20 @@ function logHistogram(
     cla()
 end
 
+function loglogHistogram(
+        data, bins, fname, ttl; 
+        xlab="Number of links", ylab="Frequency density", dpi=1000
+    )
+    hist(data, bins=bins)
+    yscale("log")
+    xscale("log")
+    title(ttl)
+    xlabel(xlab)
+    ylabel(ylab)
+    savefig(fname, dpi=dpi)
+    cla()
+end
+
 function logHistogramScaled(
         data, bins, fname, ttl; 
         xlab="Number of links", ylab="Frequency density", dpi=1000, ysc="log",
@@ -48,13 +62,16 @@ function logHistogramScaled(
     cla()
 end
 
-function scat(
-        outdegrees, indegrees, fname, ttl;
-        xlab="Outdegree", ylab="Indegree", dpi=1000, sz=0.05, ysc="log", dims=(9, 12)
+function loglogHistogramScaled(
+        data, bins, fname, ttl; 
+        xlab="Number of links", ylab="Frequency density", dpi=1000,
+        yl=1e+7, xl=3e+5
     )
-    plt = scatter(outdegrees, indegrees, s=sz, marker=".")
-    plt.set_sizes(dims, dpi=dpi)
-    yscale(ysc)
+    hist(data, bins=bins)
+    yscale("log")
+    xscale("log")
+    ylim(0, yl)
+    xlim(-2500, xl)
     title(ttl)
     xlabel(xlab)
     ylabel(ylab)
@@ -62,14 +79,54 @@ function scat(
     cla()
 end
 
+function scat(
+        outdegrees, indegrees, fname, ttl;
+        xlab="Outdegree", ylab="Indegree", dpi=1000, sz=1
+    )
+    scatter(outdegrees, indegrees, s=sz, marker=".")
+    title(ttl)
+    xlabel(xlab)
+    ylabel(ylab)
+    savefig(fname, dpi=dpi)
+    cla()
+end
 
-logHistogram(fwdNZCounts, 1000, "output/outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
-logHistogramScaled(fwdNZCounts, 1000, "output/scaled_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
+function loglogscat(
+        outdegrees, indegrees, fname, ttl;
+        xlab="Outdegree", ylab="Indegree", dpi=1000, sz=1
+    )
+    scatter(outdegrees, indegrees, s=sz, marker=".")
+    yscale("log")
+    xscale("log")
+    title(ttl)
+    xlabel(xlab)
+    ylabel(ylab)
+    savefig(fname, dpi=dpi)
+    cla()
+end
 
-logHistogram(bwdNZCounts, 1000, "output/indegree.png", "Distribution of Indegree over Pages with Indegree > 0")
-logHistogramScaled(bwdNZCounts, 1000, "output/scaled_indegree.png", "Distribution of Indegree over Pages with Indegree > 0")
+logHistogram(fwdCounts, 1000, "output/outdegree.png", "Distribution of Outdegree")
+logHistogramScaled(fwdCounts, 1000, "output/scaled_outdegree.png", "Distribution of Outdegree")
+loglogHistogram(fwdCounts, 1000, "output/loglog_outdegree.png", "Distribution of Outdegree")
+loglogHistogramScaled(fwdCounts, 1000, "output/scaled_loglog_outdegree.png", "Distribution of Outdegree")
+
+logHistogram(fwdNZCounts, 1000, "output/nz_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
+logHistogramScaled(fwdNZCounts, 1000, "output/nz_scaled_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
+loglogHistogram(fwdNZCounts, 1000, "output/nz_loglog_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
+loglogHistogramScaled(fwdNZCounts, 1000, "output/nz_scaled_loglog_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
+
+logHistogram(bwdCounts, 1000, "output/indegree.png", "Distribution of Indegree")
+logHistogramScaled(bwdCounts, 1000, "output/scaled_indegree.png", "Distribution of Indegree")
+loglogHistogram(bwdCounts, 1000, "output/loglog_indegree.png", "Distribution of Indegree")
+loglogHistogramScaled(bwdCounts, 1000, "output/scaled_loglog_indegree.png", "Distribution of Indegree")
+
+logHistogram(bwdNZCounts, 1000, "output/nz_indegree.png", "Distribution of Indegree over pages with Indegree > 0")
+logHistogramScaled(bwdNZCounts, 1000, "output/nz_scaled_indegree.png", "Distribution of Indegree over pages with Indegree > 0")
+loglogHistogram(bwdNZCounts, 1000, "output/nz_loglog_indegree.png", "Distribution of Indegree over pages with Indegree > 0")
+loglogHistogramScaled(bwdNZCounts, 1000, "output/nz_scaled_loglog_indegree.png", "Distribution of Indegree over pages with Indegree > 0")
 
 scat(fwdCounts, bwdCounts, "output/in-out.png", "Relationship between Indegree and Outdegree of Wikipedia Pages")
+loglogscat(fwdCounts, bwdCounts, "output/loglog_in-out.png", "Relationship between Indegree and Outdegree of Wikipedia Pages")
 
 analyse(fwdCounts, "Outdegrees")
 analyse(fwdNZCounts, "Non-Zero Outdegrees")

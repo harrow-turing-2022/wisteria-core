@@ -24,7 +24,7 @@ function expandBFS(wg::WikigraphUnweighed, source::Integer;
 
     s = 1
     r = 0
-    explored = Set{Int32}()
+    explored = Set{Int32}([source])
     separations = Int32[]
     frontier = Set(wg.links[source])
     push!(separations, length(frontier))
@@ -93,7 +93,7 @@ end
 
 function connectBFS(wg::WikigraphUnweighed, source::Integer, target::Integer; verbose=false)
     s = 1
-    explored = Int32[]
+    explored = Int32[source]
     frontier = Set(wg.links[source])
     parents = Dict{Int32, Int32}(t => source for t in wg.links[source])
 
@@ -203,7 +203,7 @@ end
 
 
 function bidirectionalBFS(fwg::WikigraphUnweighed, bwg::WikigraphUnweighed, source::Integer)
-    explored = Set{Int32}()
+    explored = Set{Int32}([source])
     frontier = Set(fwg.links[source]) ∪ Set(bwg.links[source])
 
     while length(frontier) > 0
@@ -245,6 +245,8 @@ function findIslands()
     return islands
 end
 
+race(fwg, "Julia_(programming_language)", "Goychay_District")
+race(bwg, "Aeneid", "Tardigrade")
 
 philID = fwg.pm.title2id["Philosophy"]
 reachability(fwg, philID, length(bwdNZCounts); printEach=true, graph=true, type="Forward")
@@ -267,12 +269,20 @@ for (rank, id) in enumerate(bwdCountIDs[argmaxk(bwdCounts, k)])
 end
 
 islands = findIslands()
+
 cnt = 0
 for (k, s) in islands
     sz = length(s)
-    if sz > 0
+    if sz > 1
         cnt += 1
         println("$(k) : $(sz)")
+
+        if sz < 10
+            for ttl in fwg.pm.id2title[collect(islands[k])]
+                println("| $(ttl)")
+            end
+        end
+
     end
 end
-println("> $(cnt) non-zero islands in total")
+println("> $(cnt) islands greater than 1 in total")

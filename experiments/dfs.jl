@@ -19,18 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 include("common.jl")
 
 
-function dfs(wg::WikigraphUnweighed)
-    t = 0
+function dfs(wg::WikigraphUnweighed, ids::Vector{Int32})
     lens = [length(i) for i in wg.links]
     
+    status = Int32[0 for _ = 1:wg.pm.totalpages]
     parents = Int32[0 for _ = 1:wg.pm.totalpages]
     positions = Int32[0 for _ = 1:wg.pm.totalpages]
-    reachables = Set{Int32}[Set{Int32}() for _ = 1:wg.pm.totalpages]
-
-    function init(u)
-        t += 1
-        times[u] = t
-    end
+    populate = Dict{Int32, Set{Int32}}()
+    reachables = Set{Int32}[Set{Int32}([i]) for i = ProgressBar(1:wg.pm.totalpages)]
 
     function next(u, src)
         pos = positions[u] + 1
@@ -38,41 +34,40 @@ function dfs(wg::WikigraphUnweighed)
         for i = pos:lens[u]
             v = wg.links[u][i]
 
-            if times[v] == 0
+            if status[v] == 0
                 positions[u] = i
                 parents[v] = u
-                return v, true
+                status[v] = 1
+                return v
+            elseif status[v] == 1
+                push!(populate[v], u)
+            elseif status[v] == 2
+                union!(reachables[u], reachables[v])
             end
-
-            (v in onStack) && (lowLinks[u] = min(lowLinks[u], times[v]))
         end
 
-        (lowLinks[u] == times[u]) && createScc(u)
+        status[u] = 2
 
-        (u == src) && (return 0, false)
+        for v in populate[u]
+            union!(reachables[v], reachables[u])
+        end
+        populate[u] = Set{Int32}([])
+
+        (u == src) && (return 0)
         
-        return parents[u], false
+        parent = parents[u]
+        union!(reachables[parent], reachables[u])
+        return parent
     end
 
-    function strongConnect(src)
-        init(src)
+    for src in ProgressBar(ids)
+        status[src] = 1
         u = src
 
-        while ((v, new) = next(u, src)) != (0, false)
-            if new
-                init(v)
-            else
-                lowLinks[v] = min(lowLinks[v], lowLinks[u])
-            end
+        while (v = next(u, src)) != 0
             u = v
         end
     end
 
-    trueIDs = [i for i = 1:wg.pm.totalpages if notRedir(wg.pm, i)]
-
-    for u in ProgressBar(trueIDs)
-        (times[u] == 0) && strongConnect(u)
-    end
-
-    return scc
+    return reachables[ids]
 end
