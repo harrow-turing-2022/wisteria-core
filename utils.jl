@@ -22,16 +22,7 @@ using JLD2, ProgressBars
 # Utility functions
 
 function normalise(title::String)
-    if length(title) == 0
-        return title
-    end
-
-    u = Int(codepoint(title[begin]))
-    if 97 <= u <= 122
-        return replace(uppercasefirst(strip(title)), " " => "_")
-    end
-    
-    return replace(strip(title), " " => "_")
+    return replace(uppercasefirst(strip(title)), " " => "_")
 end
 
 checkfile(f) = ispath(f) && rm(f)
