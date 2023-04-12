@@ -40,9 +40,9 @@ function logHistogram(
 
         fitX = [i for i in LinRange(minimum(data), maximum(data), bins * 2)]
         fitY = [a*(i^b) for i in fitX]
-        plot(fitX, fitY, color="red", label=@sprintf("y = %.3e x^%.3f", a, b))
+        line = plot(fitX, fitY, color="red", label=@sprintf("y = %.3e x^%.3f", a, b))[1]
 
-        figlegend()
+        legend(handles=[line])
     end
 
     yscale(ysc)
@@ -78,9 +78,9 @@ function logHistogram(
 
         fitX = [i for i in LinRange(minimum(data), maximum(data), bins * 2)]
         fitY = [a*(i^b) for i in fitX]
-        plot(fitX, fitY, color="red", label=@sprintf("y = %.3e x^%.3f", a, b))
+        line = plot(fitX, fitY, color="red", label=@sprintf("y = %.3e x^%.3f", a, b))[1]
 
-        figlegend()
+        legend(handles=[line])
     end
 
     xscale("log")
