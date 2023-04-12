@@ -21,7 +21,7 @@ include("common.jl")
 
 function logHistogram(
         data, fname, ttl; 
-        xlab="Number of links", ylab="Frequency density", dpi=1000, ysc="log", fit=false, bins=0
+        xlab="Number of links", ylab="Frequency density", dpi=1000, ysc="log", fit=false, bins=1000
     )
 
     (bins == 0) && (bins=maximum(data)-minimum(data)+1)
@@ -57,9 +57,9 @@ function logHistogram(
     end
 end
 
-function logHistogram(
+function loglogHistogram(
         data, fname, ttl; 
-        xlab="Number of links", ylab="Frequency density", dpi=1000, ysc="log", fit=false, bins=0
+        xlab="Number of links", ylab="Frequency density", dpi=1000, fit=false, bins=1000
     )
 
     (bins == 0) && (bins=maximum(data)-minimum(data)+1)
@@ -99,7 +99,7 @@ end
 function logHistogramScaled(
         data, fname, ttl; 
         xlab="Number of links", ylab="Frequency density", dpi=1000,
-        ysc="log", bins=0 yl=1e+7, xl=3e+5
+        ysc="log", bins=1000, yl=1e+7, xl=3e+5
     )
     (bins == 0) && (bins=maximum(data)-minimum(data)+1)
     hist(data, bins=bins)
@@ -116,7 +116,7 @@ end
 function loglogHistogramScaled(
         data, fname, ttl; 
         xlab="Number of links", ylab="Frequency density", dpi=1000,
-        yl=1e+7, xl=3e+5, bins=0
+        yl=1e+7, xl=3e+5, bins=1000
     )
     (bins == 0) && (bins=maximum(data)-minimum(data)+1)
     hist(data, bins=bins)
@@ -162,13 +162,12 @@ arrs = [fwdCounts, fwdNZCounts, bwdCounts, bwdNZCounts]
 names = ["outdegree", "outdegree", "indegree", "indegree"]
 prefix = ["", "nz_", "", "nz_"]
 
-for (a, n, p) in zip(arrs, names, prefix)
+for (a, n, p) in ProgressBar(zip(arrs, names, prefix))
     un = uppercasefirst(n)
     logHistogram(a, "output/$(p)$(n).png", "Distribution of $(un)")
-    logHistogram(a, "output/fit_$(p)$(n).png", "Distribution of $(un)"; fit=true)
-    logHistogramScaled(a, "output/$(p)scaled_$(n).png", "Distribution of $(un)")
+    logHistogram(a, "output/fit_$(p)$(n).png", "Distribution of $(un)"; fit=true, bins=0)
     loglogHistogram(a, "output/$(p)loglog_$(n).png", "Distribution of $(un)")
-    loglogHistogram(a, "output/fit_$(p)loglog_$(n).png", "Distribution of $(un)"; fit=true)
+    logHistogramScaled(a, "output/$(p)scaled_$(n).png", "Distribution of $(un)")
     loglogHistogramScaled(a, "output/$(p)scaled_loglog_$(n).png", "Distribution of $(un)")
 end
 

@@ -96,7 +96,7 @@ function writeMinK(func, k, fname)
 
     checkfile(fname)
     open(fname, "a") do f
-        for (rank, i) in enumerate(argink(data, k))
+        for (rank, i) in enumerate(argmink(data, k))
             id = ids[i]
             score = data[i]
             write(f, "$(rank) $(fwg.pm.id2title[id]) $(score)\n")
