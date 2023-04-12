@@ -19,13 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 include("common.jl")
 
 
-function runfunc(func, id)
-    indeg = length(bwg.links[id])
-    outdeg = length(fwg.links[id])
-    return func(indeg, outdeg)
-end
-
-
 function testfunc(
         func; singlePages=25, doublePages=25,
         singleDemos=[

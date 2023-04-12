@@ -34,3 +34,10 @@ fwdNZCounts = [i for i in fwdCounts if i != 0]
 bwg = loadwgQuick("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
 bwdCounts, bwdCountIDs = countlinks(bwg)
 bwdNZCounts = [i for i in bwdCounts if i != 0]
+
+
+function runfunc(func, id)
+    indeg = length(bwg.links[id])
+    outdeg = length(fwg.links[id])
+    return func(indeg, outdeg)
+end
