@@ -20,37 +20,88 @@ include("common.jl")
 
 
 function logHistogram(
-        data, bins, fname, ttl; 
-        xlab="Number of links", ylab="Frequency density", dpi=1000, ysc="log"
+        data, fname, ttl; 
+        xlab="Number of links", ylab="Frequency density", dpi=1000, ysc="log", fit=false, bins=0
     )
+
+    (bins == 0) && (bins=maximum(data)-minimum(data)+1)
     hist(data, bins=bins)
+
+    if fit
+        x = []
+        y = []
+        for (i, c) in counter(data)
+            if i > 0
+                push!(x, i)
+                push!(y, c)
+            end
+        end
+        a, b = power_fit(x, y)
+
+        fitX = [i for i in LinRange(minimum(data), maximum(data), bins * 2)]
+        fitY = [a*(i^b) for i in fitX]
+        plot(fitX, fitY, color="red", label=@sprintf("y = %.3e x^%.3f", a, b))
+
+        figlegend()
+    end
+
     yscale(ysc)
     title(ttl)
     xlabel(xlab)
     ylabel(ylab)
     savefig(fname, dpi=dpi)
     cla()
+
+    if fit
+        return a, b
+    end
 end
 
-function loglogHistogram(
-        data, bins, fname, ttl; 
-        xlab="Number of links", ylab="Frequency density", dpi=1000
+function logHistogram(
+        data, fname, ttl; 
+        xlab="Number of links", ylab="Frequency density", dpi=1000, ysc="log", fit=false, bins=0
     )
+
+    (bins == 0) && (bins=maximum(data)-minimum(data)+1)
     hist(data, bins=bins)
-    yscale("log")
+
+    if fit
+        x = []
+        y = []
+        for (i, c) in counter(data)
+            if i > 0
+                push!(x, i)
+                push!(y, c)
+            end
+        end
+        a, b = power_fit(x, y)
+
+        fitX = [i for i in LinRange(minimum(data), maximum(data), bins * 2)]
+        fitY = [a*(i^b) for i in fitX]
+        plot(fitX, fitY, color="red", label=@sprintf("y = %.3e x^%.3f", a, b))
+
+        figlegend()
+    end
+
     xscale("log")
+    yscale("log")
     title(ttl)
     xlabel(xlab)
     ylabel(ylab)
     savefig(fname, dpi=dpi)
     cla()
+
+    if fit
+        return a, b
+    end
 end
 
 function logHistogramScaled(
-        data, bins, fname, ttl; 
-        xlab="Number of links", ylab="Frequency density", dpi=1000, ysc="log",
-        yl=1e+7, xl=3e+5
+        data, fname, ttl; 
+        xlab="Number of links", ylab="Frequency density", dpi=1000,
+        ysc="log", bins=0 yl=1e+7, xl=3e+5
     )
+    (bins == 0) && (bins=maximum(data)-minimum(data)+1)
     hist(data, bins=bins)
     yscale(ysc)
     ylim(0, yl)
@@ -63,10 +114,11 @@ function logHistogramScaled(
 end
 
 function loglogHistogramScaled(
-        data, bins, fname, ttl; 
+        data, fname, ttl; 
         xlab="Number of links", ylab="Frequency density", dpi=1000,
-        yl=1e+7, xl=3e+5
+        yl=1e+7, xl=3e+5, bins=0
     )
+    (bins == 0) && (bins=maximum(data)-minimum(data)+1)
     hist(data, bins=bins)
     yscale("log")
     xscale("log")
@@ -105,25 +157,20 @@ function loglogscat(
     cla()
 end
 
-logHistogram(fwdCounts, 1000, "output/outdegree.png", "Distribution of Outdegree")
-logHistogramScaled(fwdCounts, 1000, "output/scaled_outdegree.png", "Distribution of Outdegree")
-loglogHistogram(fwdCounts, 1000, "output/loglog_outdegree.png", "Distribution of Outdegree")
-loglogHistogramScaled(fwdCounts, 1000, "output/scaled_loglog_outdegree.png", "Distribution of Outdegree")
 
-logHistogram(fwdNZCounts, 1000, "output/nz_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
-logHistogramScaled(fwdNZCounts, 1000, "output/nz_scaled_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
-loglogHistogram(fwdNZCounts, 1000, "output/nz_loglog_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
-loglogHistogramScaled(fwdNZCounts, 1000, "output/nz_scaled_loglog_outdegree.png", "Distribution of Outdegree over Pages with Outdegree > 0")
+arrs = [fwdCounts, fwdNZCounts, bwdCounts, bwdNZCounts]
+names = ["outdegree", "outdegree", "indegree", "indegree"]
+prefix = ["", "nz_", "", "nz_"]
 
-logHistogram(bwdCounts, 1000, "output/indegree.png", "Distribution of Indegree")
-logHistogramScaled(bwdCounts, 1000, "output/scaled_indegree.png", "Distribution of Indegree")
-loglogHistogram(bwdCounts, 1000, "output/loglog_indegree.png", "Distribution of Indegree")
-loglogHistogramScaled(bwdCounts, 1000, "output/scaled_loglog_indegree.png", "Distribution of Indegree")
-
-logHistogram(bwdNZCounts, 1000, "output/nz_indegree.png", "Distribution of Indegree over pages with Indegree > 0")
-logHistogramScaled(bwdNZCounts, 1000, "output/nz_scaled_indegree.png", "Distribution of Indegree over pages with Indegree > 0")
-loglogHistogram(bwdNZCounts, 1000, "output/nz_loglog_indegree.png", "Distribution of Indegree over pages with Indegree > 0")
-loglogHistogramScaled(bwdNZCounts, 1000, "output/nz_scaled_loglog_indegree.png", "Distribution of Indegree over pages with Indegree > 0")
+for (a, n, p) in zip(arrs, names, prefix)
+    un = uppercasefirst(n)
+    logHistogram(a, "output/$(p)$(n).png", "Distribution of $(un)")
+    logHistogram(a, "output/fit_$(p)$(n).png", "Distribution of $(un)"; fit=true)
+    logHistogramScaled(a, "output/$(p)scaled_$(n).png", "Distribution of $(un)")
+    loglogHistogram(a, "output/$(p)loglog_$(n).png", "Distribution of $(un)")
+    loglogHistogram(a, "output/fit_$(p)loglog_$(n).png", "Distribution of $(un)"; fit=true)
+    loglogHistogramScaled(a, "output/$(p)scaled_loglog_$(n).png", "Distribution of $(un)")
+end
 
 scat(fwdCounts, bwdCounts, "output/in-out.png", "Relationship between Indegree and Outdegree of Wikipedia Pages")
 loglogscat(fwdCounts, bwdCounts, "output/loglog_in-out.png", "Relationship between Indegree and Outdegree of Wikipedia Pages")

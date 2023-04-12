@@ -16,7 +16,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 =#
 
 
+using Printf
 using PyPlot
+using CurveFit
 using Pingouin
 using Statistics
 using ProgressBars
