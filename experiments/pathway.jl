@@ -19,116 +19,172 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using("common.jl")
 
 
+_n = 1
+_δ = 0.3
+_ρ = 0.5
+_θ = NaN
+_levels = Inf
+
+
+function init(source::Int32, deg1s::Set{Int32})
+    drainage = Dict{Int32, Float64}(collect(deg1s) .=> 0)
+    for v in fwg.links[source]
+        (v in deg1s) && (drainage[v] += 1)
+    end
+    return drainage
+end
+
+
+function step(prev::Dict{Int32, Float64}, deg1s::Set{Int32})
+    next = Dict{Int32, Float64}(collect(deg1s) .=> 0)
+    for i in deg1s
+        unit::Float64 = prev[i] / (length(fwg.links[i]) + length(bwg.links[i]))
+        for v in fwg.links[i]
+            (v in deg1s) && (next[v] += unit)
+        end
+    end
+    return next
+end
+
+
 function explore!(
         source::Integer, levels::Number, direction::Function;
         prereqs::Dict{Int32, Vector{Int32}}=Dict{Int32, Vector{Int32}}(),
         explored::Set{Int32}=Set{Int32}(),
-        δ::Float64=0.4, ρ::Float64=0.4, θ::Float64=NaN
+        n::Integer=_n, δ::Float64=_δ, ρ::Float64=_ρ, θ::Float64=_θ
     )
 
     κpsrc = runfunc(κ_prime, source)
     (direction == +) && (compFn = >)
     (direction == -) && (compFn = <)
-    if isnan(θ)
-        θ = (direction == -) ? 0.3 : 25.0
-    end
+    isnan(θ) && ( θ = (direction == -) ? 0.3 : 25.0 )
 
-    if levels == 0
-        return prereqs
-    elseif levels == Inf && compFn(κpsrc, θ)
-        return prereqs
-    end
+    (levels == 0 || (levels == Inf && compFn(κpsrc, θ))) && (return prereqs)
 
     push!(explored, source)
-    deg1s = union(fwg.links[source], bwg.links[source])
+    deg1s = Set(union(fwg.links[source], bwg.links[source]))
+    drainage = init(source, deg1s)
 
-    if length(deg1s) > 1e+5
-        drainage = Float64[0.0 for _ = 1:fwg.pm.totalpages]
-        drainage[fwg.links[source]] .+= 1
-        drainage[bwg.links[source]] .+= 1
-    else
-        drainage = Dict{Int32, Float64}(i => 0 for i in deg1s)
-        for v in fwg.links[source]
-            drainage[v] += 1
-        end
-        for v in bwg.links[source]
-            drainage[v] += 1
-        end
-    end
-
-    for u in deg1s
-        unit = drainage[u] / (length(fwg.links[u]) + length(bwg.links[u]))
-
-        if length(deg1s) > 1e+5
-            drainage[fwg.links[u]] .+= unit
-            drainage[bwg.links[u]] .+= unit
-        else
-            for v in intersect(fwg.links[u], deg1s)
-                drainage[v] += unit
-            end
-            for v in intersect(bwg.links[u], deg1s)
-                drainage[v] += unit
-            end
-        end
+    for _ = 1:n
+        drainage = step(drainage, deg1s)
     end
 
     idxThresh = κpsrc * direction(1, δ)
-
-    ids = [
-        i for i in deg1s
-        if (i ∉ explored) && compFn(runfunc(κ_prime, i), idxThresh)
-    ]
+    ids = Int32[i for i in deg1s if compFn(runfunc(κ_prime, i), idxThresh) && i ∉ explored]
     acc = Float64[drainage[i] for i in ids]
 
-    if length(ids) == 0
-        return prereqs, acc, ids
-    end
+    (length(ids) == 0) && (return prereqs)
     
     accThresh = maximum(acc) * (1 - ρ)
 
-    prereqs[source] = sort([i for (e, i) in enumerate(ids) if acc[e] > accThresh]) # Start learning from small κ'
+    list = Int32[]
+    vals = Float64[]
+    for (e, i) in enumerate(ids)
+        if acc[e] > accThresh
+            push!(vals, acc[e])
+            push!(list, i)
+        end
+    end
+
+    (length(list) == 0) && (return prereqs)
+
+    prereqs[source] = list[sortperm(vals; rev=true)] # Start learning from biggest drainage
     union!(explored, prereqs[source])
 
     for i in prereqs[source]
         explore!(i, levels-1, direction; prereqs=prereqs, explored=explored, δ=δ, ρ=ρ, θ=θ)
     end
     
-    return prereqs, acc, ids
+    return prereqs
 end
 
 
-function _nestedPrint(id, prereqs, prefix)
+function _nestedStringify(id, prereqs; prefix="", ret="")
     if haskey(prereqs, id)
         for e = 1:length(prereqs[id])-1
             i = prereqs[id][e]
-            println("$(prefix)├── $(fwg.pm.id2title[i])")
-            _nestedPrint(i, prereqs, "$(prefix)│   ")
+            ret *= "$(prefix)├── $(fwg.pm.id2title[i])\n"
+            ret = _nestedStringify(i, prereqs; prefix="$(prefix)│   ", ret=ret)
         end
         i = prereqs[id][end]
-        println("$(prefix)└── $(fwg.pm.id2title[i])")
-        _nestedPrint(i, prereqs, "$(prefix)    ")
+        ret *= "$(prefix)└── $(fwg.pm.id2title[i])\n"
+        ret = _nestedStringify(i, prereqs; prefix="$(prefix)    ", ret=ret)
     end
+    return ret
 end
 
 
-function printReqs(title::String; direction=nothing, levels=Inf, δ=0.4, ρ=0.4, θ=NaN)
+function stringifyReqs(title::String, direction::Function; levels=_levels, n=_n, δ=_δ, ρ=_ρ, θ=_θ, md=false)
     titleID = fwg.pm.title2id[title]
 
-    if direction === nothing
-        κp = runfunc(κ_prime, titleID)
-        if κp < 15 direction = +
-        else direction = - end
-    end
+    prereqs = explore!(titleID, levels, direction; n=n, δ=δ, ρ=ρ, θ=θ)
 
-    prereqs, = explore!(titleID, levels, direction; δ=δ, ρ=ρ, θ=θ)
-    println(fwg.pm.id2title[titleID])
-    _nestedPrint(titleID, prereqs, "")
+    ret::String = ""
+    md && (ret *= "```\n")
+    ret *= "$(title) ($(direction)) [n=$(n), δ=$(δ), ρ=$(ρ), θ=$(θ), levels=$(levels)]\n"
+    ret *= _nestedStringify(titleID, prereqs)
+    md && (ret *= "```\n\n---\n\n")
+    return ret
 end
 
 
-printReqs("Meiosis"; direction=+)
-printReqs("Meiosis"; direction=-, levels=3)
-printReqs("Meiosis"; direction=-)
+function screen(title::String; ns=1:6, deltas=0.1:0.1:0.6, rhos=0.1:0.1:0.6, levels=1:3)
+    fname = "output/pathway_$(title)_planning.md"
+    checkfile(fname)
 
-printReqs("Special_relativity"; direction=+, levels=2)
-printReqs("Meiosis"; direction=-, levels=3)
+    open(fname, "a") do f
+
+        println(title)
+        write(f, "# $(title)\n")
+
+        for direction in ( - , + )
+
+            write(f, "## $(title) ($(direction))\n")
+
+            write(f, "### $(title) ($(direction)) `Default`\n")
+            write(f, stringifyReqs(title, direction; md=true))
+            print(".")
+
+            write(f, "### $(title) ($(direction)) `n`\n")
+            for i in ns
+                write(f, stringifyReqs(title, direction; n=i, levels=1, md=true))
+            end
+            print(".")
+
+            write(f, "### $(title) ($(direction)) `δ`\n")
+            for i in deltas
+                write(f, stringifyReqs(title, direction; δ=i, levels=1, md=true))
+            end
+            print(".")
+
+            write(f, "### $(title) ($(direction)) `ρ`\n")
+            for i in rhos
+                write(f, stringifyReqs(title, direction; ρ=i, levels=1, md=true))
+            end
+            print(".")
+
+            write(f, "### $(title) ($(direction)) `levels`\n")
+            for i in levels
+                write(f, stringifyReqs(title, direction; levels=i, md=true))
+            end
+            println(".")
+        end
+    end
+end
+
+
+screen("Meiosis"; ns=1:20)
+screen("Climate_change")
+screen("Newton's_laws_of_motion")
+screen("Parallel_postulate")
+screen("Public-key_cryptography")
+
+screen("Special_relativity")
+screen("Artificial_intelligence")
+screen("Calculus")
+screen("Linear_algebra")
+screen("Wikipedia")
+screen("Julia_(programming_language)")
+screen("Impressionism")
+screen("Tardigrade")
+screen("Virgil")

@@ -47,7 +47,7 @@ end
 
 function statsfunc(func, name)
     raw = [runfunc(func, i) for i in fwdCountIDs]
-    data = [i for i in raw if !isnan(i) && !(i in (Inf, -Inf))]
+    data = [i for i in raw if !(isnan(i) || i in (Inf, -Inf))]
     analyse(data, "$(name) w/o {NaN, Inf, -Inf}")
     println("> $(name) with everything <")
     println("| Length:\t$(length(raw))")
@@ -65,7 +65,7 @@ function writeMaxK(func, k, fname)
 
     for i in fwdCountIDs
         r = runfunc(func, i)
-        if r ∉ (-Inf, Inf, NaN)
+        if !(r in (-Inf, Inf) || isnan(r))
             push!(data, r)
             push!(ids, i)
         end
@@ -88,7 +88,7 @@ function writeMinK(func, k, fname)
 
     for i in fwdCountIDs
         r = runfunc(func, i)
-        if r ∉ (-Inf, Inf, NaN)
+        if !(r in (-Inf, Inf) || isnan(r))
             push!(data, r)
             push!(ids, i)
         end

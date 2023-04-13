@@ -133,7 +133,7 @@ end
 
 function scat(
         outdegrees, indegrees, fname, ttl;
-        xlab="Outdegree", ylab="Indegree", dpi=1000, sz=1
+        xlab="Out-degree", ylab="In-degree", dpi=1000, sz=1
     )
     scatter(outdegrees, indegrees, s=sz, marker=".")
     title(ttl)
@@ -145,7 +145,7 @@ end
 
 function loglogscat(
         outdegrees, indegrees, fname, ttl;
-        xlab="Outdegree", ylab="Indegree", dpi=1000, sz=1
+        xlab="Out-degree", ylab="In-degree", dpi=1000, sz=1
     )
     scatter(outdegrees, indegrees, s=sz, marker=".")
     yscale("log")
@@ -159,25 +159,27 @@ end
 
 
 arrs = [fwdCounts, fwdNZCounts, bwdCounts, bwdNZCounts]
-names = ["outdegree", "outdegree", "indegree", "indegree"]
+names = ["out-degree", "out-degree", "in-degree", "in-degree"]
+upnames = ["Out-Degree", "Out-Degree", "In-Degree", "In-Degree"]
 prefix = ["", "nz_", "", "nz_"]
 
-for (a, n, p) in ProgressBar(zip(arrs, names, prefix))
-    un = uppercasefirst(n)
+for (a, n, un, p) in ProgressBar(zip(arrs, names, upnames, prefix))
     logHistogram(a, "output/$(p)$(n).png", "Distribution of $(un)")
-    logHistogram(a, "output/fit_$(p)$(n).png", "Distribution of $(un)"; fit=true, bins=0)
     loglogHistogram(a, "output/$(p)loglog_$(n).png", "Distribution of $(un)")
     logHistogramScaled(a, "output/$(p)scaled_$(n).png", "Distribution of $(un)")
     loglogHistogramScaled(a, "output/$(p)scaled_loglog_$(n).png", "Distribution of $(un)")
 end
 
-scat(fwdCounts, bwdCounts, "output/in-out.png", "Relationship between Indegree and Outdegree of Wikipedia Pages")
-loglogscat(fwdCounts, bwdCounts, "output/loglog_in-out.png", "Relationship between Indegree and Outdegree of Wikipedia Pages")
+logHistogram(fwdCounts, "output/fit_outdegree.png", "Distribution of Out-degree"; fit=true, bins=0)
+logHistogram(bwdCounts, "output/fit_indegree.png", "Distribution of In-degree"; fit=true, bins=0)
 
-analyse(fwdCounts, "Outdegrees")
-analyse(fwdNZCounts, "Non-Zero Outdegrees")
-analyse(bwdCounts, "Indegrees")
-analyse(bwdNZCounts, "Non-Zero Indegrees")
+scat(fwdCounts, bwdCounts, "output/in-out.png", "Relationship between In-Degree and Out-Degree of Wikipedia Pages")
+loglogscat(fwdCounts, bwdCounts, "output/loglog_in-out.png", "Relationship between In-degree and Out-Degree of Wikipedia Pages")
+
+analyse(fwdCounts, "Out-Degrees")
+analyse(fwdNZCounts, "Non-Zero Out-Degrees")
+analyse(bwdCounts, "In-Degrees")
+analyse(bwdNZCounts, "Non-Zero In-Degrees")
 
 fwdE = sum(fwdCounts)
 fwdV = length(fwdCounts)
