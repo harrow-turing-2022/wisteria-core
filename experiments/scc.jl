@@ -183,7 +183,7 @@ maxSz = maximum(sizes)
 maxIdx = argmax(sizes)
 println("Biggest SCC is codenamed the *$(fwg.pm.id2title[collect(scc[maxIdx])[begin]]) cluster*")
 
-isolated = Set{Int32}([i for i = 1:fwg.pm.totalpages if notRedir(fwg.pm, i) && length(fwg.links[i]) == 0])
+sinks = Set{Int32}([i for i = 1:fwg.pm.totalpages if notRedir(fwg.pm, i) && length(fwg.links[i]) == 0])
 initialComps = Set{Int32}()
 for i in scc
     if length(i) == 1
@@ -193,7 +193,7 @@ for i in scc
     end
 end
 println("Length of initial chunk of length-1 SCCs: $(length(initialComps))")
-println("Length of isolated pages in forward Wikigraph: $(length(isolated))")
+println("Length of sink pages in forward Wikigraph: $(length(sinks))")
 
 
 x = sort(collect(Set(sizes)))

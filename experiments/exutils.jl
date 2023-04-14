@@ -34,16 +34,16 @@ function countlinks(wg::Union{Wikigraph, WikigraphUnweighed})
     return counts, countIDs
 end
 
-function countIsolated(wg::Union{Wikigraph, WikigraphUnweighed})
-    isolated = Int32[]
+function countSinks(wg::Union{Wikigraph, WikigraphUnweighed})
+    sinks = Int32[]
 
     for srcID in ProgressBar(1:wg.pm.totalpages)
         if notRedir(wg.pm, srcID) && length(wg.links[srcID] == 0)
-            push!(isolated, srcID)
+            push!(sinks, srcID)
         end
     end
 
-    return isolated
+    return sinks
 end
 
 function analyse(arr, name)

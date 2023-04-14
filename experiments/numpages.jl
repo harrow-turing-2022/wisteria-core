@@ -25,7 +25,7 @@ function pageAnalysis(wg, isoPath, name)
     open(isoPath, "a") do f
         redirCount = 0
         linkedCount = 0
-        isolatedCount = 0
+        sinkCount = 0
         totalCount = 0
     
         maxlks = 0
@@ -53,7 +53,7 @@ function pageAnalysis(wg, isoPath, name)
                 end
             
             else
-                isolatedCount += 1
+                sinkCount += 1
                 write(f, wg.pm.id2title[i], "\n")
             end
 
@@ -67,7 +67,7 @@ function pageAnalysis(wg, isoPath, name)
         println("| Total pages:\t\t$(expandStats(totalCount))")
         println("| Redirected pages:\t$(expandStats(redirCount))")
         println("| Linked pages:\t\t$(expandStats(linkedCount))")
-        println("| Isolated pages:\t$(expandStats(isolatedCount))")
+        println("| Sink pages:\t$(expandStats(sinkCount))")
         println("| pm Total pages:\t$(wg.pm.totalpages)")
         println("| pm Unredirected:\t$(wg.pm.numpages)")
         println("| Max # links:\t$(maxlks) [ $(maxpage) ]")
@@ -75,8 +75,8 @@ function pageAnalysis(wg, isoPath, name)
     end
 end
 
-pageAnalysis(fwg, "output/fwdIsolated.txt", "Outbound Graph")
-pageAnalysis(bwg, "output/bwdIsolated.txt", "Inbound Graph")
+pageAnalysis(fwg, "output/fwdSinks.txt", "Outbound Graph")
+pageAnalysis(bwg, "output/bwdSinks.txt", "Inbound Graph")
 
 checkfile("output/fwdTop1000.txt")
 open("output/fwdTop1000.txt", "a") do f
