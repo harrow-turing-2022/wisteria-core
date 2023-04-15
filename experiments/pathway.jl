@@ -28,7 +28,7 @@ _levels = Inf
 
 function init(source::Int32, deg1s::Set{Int32})
     drainage = Dict{Int32, Float64}(collect(deg1s) .=> 0)
-    for v in fwg.links[source]
+    for v in [fwg.links[source]; bwg.links[source]]
         (v in deg1s) && (drainage[v] += 1)
     end
     return drainage
@@ -70,7 +70,7 @@ function explore!(
     end
 
     idxThresh = κpsrc * direction(1, δ)
-    ids = Int32[i for i in deg1s if compFn(runfunc(κ_prime, i), idxThresh) && i ∉ explored]
+    ids = Int32[i for i in deg1s if compFn(runfunc(κ_prime, i), idxThresh)]
     acc = Float64[drainage[i] for i in ids]
 
     (length(ids) == 0) && (return prereqs)
@@ -89,9 +89,10 @@ function explore!(
     (length(list) == 0) && (return prereqs)
 
     prereqs[source] = list[sortperm(vals; rev=true)] # Start learning from biggest drainage
-    union!(explored, prereqs[source])
+    toExplore = setdiff(prereqs[source], explored)
+    union!(explored, toExplore)
 
-    for i in prereqs[source]
+    for i in toExplore
         explore!(i, levels-1, direction; prereqs=prereqs, explored=explored, δ=δ, ρ=ρ, θ=θ)
     end
     
@@ -99,16 +100,27 @@ function explore!(
 end
 
 
-function _nestedStringify(id, prereqs; prefix="", ret="")
+function _nestedStringify(id, prereqs; prefix="", ret="", root=0, done=Set{Int32})
+    (root == 0) && (root = id)
     if haskey(prereqs, id)
         for e = 1:length(prereqs[id])-1
             i = prereqs[id][e]
-            ret *= "$(prefix)├── $(fwg.pm.id2title[i])\n"
-            ret = _nestedStringify(i, prereqs; prefix="$(prefix)│   ", ret=ret)
+            if i in done
+                (i != root) && (ret *= "$(prefix)├── ** $(fwg.pm.id2title[i]) **\n")
+            else
+                push!(done, i)
+                ret *= "$(prefix)├── $(fwg.pm.id2title[i])\n"
+                ret = _nestedStringify(i, prereqs; prefix="$(prefix)│   ", ret=ret, root=root, done=done)
+            end
         end
         i = prereqs[id][end]
-        ret *= "$(prefix)└── $(fwg.pm.id2title[i])\n"
-        ret = _nestedStringify(i, prereqs; prefix="$(prefix)    ", ret=ret)
+        if i in done
+            (i != root) && (ret *= "$(prefix)└── ** $(fwg.pm.id2title[i]) **\n")
+        else
+            push!(done, i)
+            ret *= "$(prefix)└── $(fwg.pm.id2title[i])\n"
+            ret = _nestedStringify(i, prereqs; prefix="$(prefix)    ", ret=ret, root=root, done)
+        end
     end
     return ret
 end
@@ -122,7 +134,7 @@ function stringifyReqs(title::String, direction::Function; levels=_levels, n=_n,
     ret::String = ""
     md && (ret *= "```\n")
     ret *= "$(title) ($(direction)) [n=$(n), δ=$(δ), ρ=$(ρ), θ=$(θ), levels=$(levels)]\n"
-    ret *= _nestedStringify(titleID, prereqs)
+    ret *= _nestedStringify(titleID, prereqs; done=Set(titleID))
     md && (ret *= "```\n\n---\n\n")
     return ret
 end
