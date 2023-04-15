@@ -285,4 +285,5 @@ for (k, s) in islands
 
     end
 end
+println("> $(length(islands)) islands in total")
 println("> $(cnt) islands greater than 1 in total")
