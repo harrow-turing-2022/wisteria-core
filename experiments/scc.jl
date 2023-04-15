@@ -19,8 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 include("common.jl")
 
 
-function tarjan(wg::WikigraphUnweighed)
+function tarjan(wg::WikigraphUnweighed, rwg::WikigraphUnweighed)
     t = 0
+    id = 0
     stack = Stack{Int32}()
 
     times = Int32[0 for _ = 1:wg.pm.totalpages]
@@ -31,6 +32,8 @@ function tarjan(wg::WikigraphUnweighed)
 
     onStack = Set{Int32}()
     scc = Set{Int32}[]
+    gscc = Set{Int32}[]
+    gscclinks = Set{Int32}[Set() for _ = 1:wg.pm.totalpages]
 
     function init(u)
         t += 1
@@ -40,15 +43,29 @@ function tarjan(wg::WikigraphUnweighed)
         push!(onStack, u)
     end
 
+    function addToComponent(component, v)
+        pop!(onStack, v)
+        push!(component, v)
+        for x in rwg.links[v]
+            push!(gscclinks[x], id)
+        end
+    end
+
     function createScc(u)
+        id += 1
         component = Set{Int32}()
         while (v = pop!(stack)) != u
-            pop!(onStack, v)
-            push!(component, v)
+            addToComponent(component, v)
         end
-        pop!(onStack, u)
-        push!(component, u)
+        addToComponent(component, u)
         push!(scc, component)
+
+        lk = Set{Int32}()
+        for i in component
+            union!(lk, gscclinks[i])
+        end
+        setdiff!(lk, Set{Int32}(id))
+        push!(gscc, lk)
     end
 
     function next(u, src)
@@ -93,7 +110,7 @@ function tarjan(wg::WikigraphUnweighed)
         (times[u] == 0) && strongConnect(u)
     end
 
-    return scc
+    return scc, gscc
 end
 
 
@@ -167,6 +184,27 @@ function expandBFS(wg::WikigraphUnweighed, source::Integer;
 end
 
 
+function gsccBFS(scc::Vector{Set{Int32}}, gscc::Vector{Set{Int32}}, source::Integer)
+    explored = Set{Int32}(source)
+    frontier = gscc[source]
+    numReached = length(scc[source])
+
+    while length(frontier) > 0
+        newFrontier = Set{Int32}()
+
+        for id in frontier
+            numReached += length(scc[id])
+            union!(newFrontier, gscc[id])
+        end
+        union!(explored, frontier)
+
+        frontier = setdiff(newFrontier, explored)
+    end
+
+    return numReached
+end
+
+
 function writeSCC(idx, sz)
     checkfile("output/scc$(idx)_$(sz).txt")
     open("output/scc$(idx)_$(sz).txt", "a") do f
@@ -177,10 +215,13 @@ function writeSCC(idx, sz)
 end
 
 
-scc = tarjan(fwg)
+scc, gscc = tarjan(fwg, bwg)
+
+numSCC = length(scc)
 sizes = [length(i) for i in scc]
 maxSz = maximum(sizes)
 maxIdx = argmax(sizes)
+println("Wikipedia has $(numSCC) SCCs")
 println("Biggest SCC is codenamed the *$(fwg.pm.id2title[collect(scc[maxIdx])[begin]]) cluster*")
 
 sinks = Set{Int32}([i for i = 1:fwg.pm.totalpages if notRedir(fwg.pm, i) && length(fwg.links[i]) == 0])
@@ -211,26 +252,55 @@ for (sz, cnt) in zip(x, y)
     end
 end
 
-scatter(x, y, s=2, marker=".")
+
+scatter(x, y, s=4, marker=".", color="mediumpurple")
 yscale("log")
 xscale("log")
-title("Number of Wikipedia SCC across different sizes")
-xlabel("Size of strongly-connected component")
+# title("Number of Wikipedia SCC of different sizes")
+xlabel("Size of SCC")
 ylabel("Count")
 savefig("output/scc_count_dots.png", dpi=1000)
 cla()
 
-plot(x, y)
+scatter(x, y, s=15, marker="x", color="mediumpurple")
 yscale("log")
 xscale("log")
-title("Number of Wikipedia SCC across different sizes")
-xlabel("Size of strongly-connected component")
+# title("Number of Wikipedia SCC of different sizes")
+xlabel("Size of SCC")
+ylabel("Count")
+savefig("output/scc_count_crosses.png", dpi=1000)
+cla()
+
+scatter(x, y, s=15, marker="1", color="mediumpurple")
+yscale("log")
+xscale("log")
+# title("Number of Wikipedia SCC of different sizes")
+xlabel("Size of SCC")
+ylabel("Count")
+savefig("output/scc_count_tri.png", dpi=1000)
+cla()
+
+plot(x, y, color="mediumpurple")
+yscale("log")
+xscale("log")
+# title("Number of Wikipedia SCC of different sizes")
+xlabel("Size of SCC")
 ylabel("Count")
 savefig("output/scc_count_line.png", dpi=1000)
 cla()
 
+bar(x, y, color="mediumpurple")
+yscale("log")
+xscale("log")
+# title("Number of Wikipedia SCC of different sizes")
+xlabel("Size of SCC")
+ylabel("Count")
+savefig("output/scc_count_bar.png", dpi=1000)
+cla()
+
 
 selects = [collect(i)[begin] for i in scc]
+maxSCC = scc[maxIdx]
 
 fwdSrc = 0
 for i in reverse(selects)
@@ -249,3 +319,43 @@ for i in selects
     end
 end
 expandBFS(bwg, bwdSrc; printEach=true, nzCount=length(fwdNZCounts))
+
+
+fwdReaches = [gsccBFS(scc, gscc, i) for i in ProgressBar(numSCC:-1:maxIdx+1)]
+fwdMaxReach = maximum(fwdReaches)
+for (scc_i, reach) in enumerate(fwdReaches)
+    if reach == fwdMaxReach
+        correct_scc_i = numSCC + 1 - scc_i
+        println("Most reachy fwd SCC is #$(correct_scc_i) at $(fwdMaxReach) articles")
+        println("It contains: $([fwg.pm.id2title[id] for id in scc[correct_scc_i]])")
+    end
+end
+
+
+gscc_T = Set{Int32}[Set() for _ = 1:numSCC]
+for (u, lk) in enumerate(gscc)
+    for v in lk
+        push!(gscc_T[v], u)
+    end
+end
+bwdReaches = [gsccBFS(scc, gscc_T, i) for i in ProgressBar(1:maxIdx-1)]
+bwdMaxReach = maximum(bwdReaches)
+for (scc_i, reach) in enumerate(bwdReaches)
+    if reach == bwdMaxReach
+        println("Most reachy fwd SCC is #$(scc_i) at $(bwdMaxReach) articles")
+        println("It contains: $([bwg.pm.id2title[id] for id in scc[scc_i]])")
+    end
+end
+
+
+gsccOutdegs = [length(gscc[i]) for i = 1:numSCC]
+for (rank, scc_i) in enumerate(argmaxk(gsccOutdegs, 10))
+    outdeg = gsccOutdegs[scc_i]
+    println("Top $(rank) SCC #$(scc_i) : deg+ = $(outdeg)")
+end
+
+gsccIndegs = [length(gscc_T[i]) for i = 1:numSCC]
+for (rank, scc_i) in enumerate(argmaxk(gsccIndegs, 10))
+    indeg = gsccIndegs[scc_i]
+    println("Top $(rank) SCC #$(scc_i) : deg- = $(indeg)")
+end

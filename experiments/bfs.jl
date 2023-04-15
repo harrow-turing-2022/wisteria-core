@@ -268,22 +268,29 @@ for (rank, id) in enumerate(bwdCountIDs[argmaxk(bwdCounts, k)])
     reachability(bwg, id, length(fwdNZCounts); maxSeparation=1, verbose=false)
 end
 
+
 islands = findIslands()
 
+checkfile("output/islands.txt")
 cnt = 0
-for (k, s) in islands
-    sz = length(s)
-    if sz > 1
-        cnt += 1
-        println("$(k) : $(sz)")
 
-        if sz < 10
-            for ttl in fwg.pm.id2title[collect(islands[k])]
-                println("| $(ttl)")
+open("output/islands.txt", "a") do f
+    for (k, s) in islands
+        sz = length(s)
+        if sz > 1
+            cnt += 1
+            println("$(k) : $(sz)")
+
+            if sz < 10
+                for ttl in fwg.pm.id2title[collect(islands[k])]
+                    println("| $(ttl)")
+                end
             end
-        end
 
+        end
+        write(f, fwg.pm.id2title[collect(islands[begin])], " : $(sz)\n")
     end
 end
+
 println("> $(length(islands)) islands in total")
 println("> $(cnt) islands greater than 1 in total")
