@@ -178,25 +178,25 @@ function reachability(
     if graph
         bar([i for i = 1:s], separations, color=color)
         yscale("log")
-        title("$(type)BFS expansion of $(ttl)")
+        # title("$(type)BFS expansion of $(ttl)")
         xlabel("Degree of separation")
         ylabel("Number of new pages reached", fontsize=yfontsz)
-        savefig("output/bfsDif_$(norm(ttl))_deg$(s).png", dpi=dpi)
+        savefig("output/bfsDif_$(norm(ttl))_deg$(s).pdf", bbox_inches="tight")
         cla()
         
         cumseps = cumsum(separations)
         plot([i for i = 1:s], cumseps, color=color)
-        title("$(type)BFS expansion of $(ttl)")
+        # title("$(type)BFS expansion of $(ttl)")
         xlabel("Degree of separation")
         ylabel("Number of pages reached", fontsize=yfontsz)
-        savefig("output/bfsCum_$(norm(ttl))_deg$(s).png", dpi=dpi)
+        savefig("output/bfsCum_$(norm(ttl))_deg$(s).pdf", bbox_inches="tight")
         cla()
 
         plot([i for i = 1:s], cumseps / nzCount, color=color)
-        title("$(type)BFS expansion of $(ttl)")
+        # title("$(type)BFS expansion of $(ttl)")
         xlabel("Degree of separation")
         ylabel("Number of pages reached (fraction of reachable)", fontsize=yfontsz)
-        savefig("output/bfsCumScaled_$(norm(ttl))_deg$(s).png", dpi=dpi)
+        savefig("output/bfsCumScaled_$(norm(ttl))_deg$(s).pdf", bbox_inches="tight")
         cla()
     end
 end

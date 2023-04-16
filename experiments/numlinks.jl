@@ -46,10 +46,10 @@ function logHistogram(
     end
 
     yscale(ysc)
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, bbox_inches="tight")
     cla()
 
     if fit
@@ -85,10 +85,10 @@ function loglogHistogram(
 
     xscale("log")
     yscale("log")
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, bbox_inches="tight")
     cla()
 
     if fit
@@ -106,10 +106,10 @@ function logHistogramScaled(
     yscale(ysc)
     ylim(0, yl)
     xlim(-2500, xl)
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, bbox_inches="tight")
     cla()
 end
 
@@ -124,10 +124,10 @@ function loglogHistogramScaled(
     xscale("log")
     ylim(0, yl)
     xlim(-2500, xl)
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, bbox_inches="tight")
     cla()
 end
 
@@ -136,10 +136,10 @@ function scat(
         xlab="Out-degree", ylab="In-degree", dpi=1000, sz=1
     )
     scatter(outdegrees, indegrees, s=sz, marker=".")
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, bbox_inches="tight")
     cla()
 end
 
@@ -150,10 +150,10 @@ function loglogscat(
     scatter(outdegrees, indegrees, s=sz, marker=".")
     yscale("log")
     xscale("log")
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, bbox_inches="tight")
     cla()
 end
 

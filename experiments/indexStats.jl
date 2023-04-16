@@ -29,7 +29,7 @@ function graphfunc(
 
     n, b, _ = hist(data, bins=bins, color=color, density=approx)
     yscale(ysc)
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab, fontsize=yfontsz)
 
@@ -40,7 +40,7 @@ function graphfunc(
         plot(x, y, color="green")
     end
 
-    savefig(fname, dpi=dpi)
+    savefig(fname, bbox_inches="tight")
     cla()
 end
 
