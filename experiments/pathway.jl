@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using("common.jl")
 
 
-_n = 1
+_n = 3
 _δ = 0.3
 _ρ = 0.5
 _θ = NaN
@@ -38,7 +38,7 @@ end
 function step(prev::Dict{Int32, Float64}, deg1s::Set{Int32})
     next = Dict{Int32, Float64}(collect(deg1s) .=> 0)
     for i in deg1s
-        unit::Float64 = prev[i] / (length(fwg.links[i]) + length(bwg.links[i]))
+        unit::Float64 = prev[i] / length(fwg.links[i])
         for v in fwg.links[i]
             (v in deg1s) && (next[v] += unit)
         end
@@ -88,7 +88,7 @@ function explore!(
 
     (length(list) == 0) && (return prereqs)
 
-    prereqs[source] = list[sortperm(vals; rev=true)] # Start learning from biggest drainage
+    prereqs[source] = list[sortperm(vals; rev=true)] # Start learning from biggest drainage - the most important concepts
     toExplore = setdiff(prereqs[source], explored)
     union!(explored, toExplore)
 
@@ -200,3 +200,6 @@ screen("Julia_(programming_language)")
 screen("Impressionism")
 screen("Tardigrade")
 screen("Virgil")
+
+print(stringifyReqs("Causality", -; n=3, δ=0.3, ρ=0.35, levels=_levels))
+print(stringifyReqs("Causality", +; n=3, δ=0.3, ρ=0.35, levels=_levels))

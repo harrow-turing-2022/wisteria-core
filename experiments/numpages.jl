@@ -91,3 +91,15 @@ open("output/bwdTop1000.txt", "a") do f
         write(f, "$(rank) $(bwg.pm.id2title[id])\n")
     end
 end
+
+checkfile("output/selflinked.txt")
+open("output/selflinked.txt", "a") do f
+    selfCount = 0
+    for (id, lk) in enumerate(ProgressBar(fwg.links))
+        if id in lk
+            selfCount += 1
+            write(f, "$(fwg.pm.id2title[id])\n")
+        end
+    end
+    println("$(selfCount) articles link back into themselves")
+end
