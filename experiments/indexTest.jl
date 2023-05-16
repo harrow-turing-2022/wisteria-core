@@ -114,10 +114,10 @@ function analyseAbs(absData, funcname, fname; start=1, maxLen=Inf, dpi=1000)
     println("$(funcname) Correlation: $(cor(x, y))")
 
     scatter(x, y)
-    title("Alignment of $(funcname) with human perception of page relevance")
+    # title("Alignment of $(funcname) with human perception of page relevance")
     xlabel("$(funcname) score")
     ylabel("Human perception")
-    savefig(fname, dpi=dpi)
+    savefig(fname, bbox_inches="tight")
     cla()
 end
 
@@ -141,8 +141,8 @@ function analyseCom(comData, funcname, fname; start=1, maxLen=Inf, dpi=1000)
     sizes = [count(i->(i==1), ans), count(i->(i==0), ans), count(i->(i==-1), ans)]
     colors = ["green", "grey", "red"]
     pie(sizes, labels=labels, autopct="%1.1f%%", colors=colors)
-    title("Human evaluation of comparative page relevances")
-    savefig(fname, dpi=dpi)
+    # title("Human evaluation of comparative page relevances")
+    savefig(fname, bbox_inches="tight")
     cla()
 end
 

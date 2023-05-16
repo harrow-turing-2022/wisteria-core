@@ -34,8 +34,8 @@ function expandBFS(wg::WikigraphUnweighed, source::Integer;
         numReached = length(frontier)
         println("At $(s) degrees of separation $(ttl) reaches:")
         println("| $(numReached) articles")
-        println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia pages")
-        println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia pages")
+        println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia articles")
+        println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia articles")
     end
 
     while length(frontier) > 0 && s < maxSeparation
@@ -68,8 +68,8 @@ function expandBFS(wg::WikigraphUnweighed, source::Integer;
             numReached = length(explored) + r
             println("At $(s) degrees of separation $(ttl) reaches:")
             println("| $(numReached) articles")
-            println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia pages")
-            println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia pages")
+            println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia articles")
+            println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia articles")
         end
     end
 
@@ -141,8 +141,8 @@ function race(wg::WikigraphUnweighed, startTitle::AbstractString, endTitle::Abst
     startID = wg.pm.title2id[startTitle]
     endID = wg.pm.title2id[endTitle]
 
-    @assert notRedir(wg.pm, startID) "Start title $(startTitle) is a redirected page"
-    @assert notRedir(wg.pm, endID) "End title $(endTitle) is a redirected page"
+    @assert notRedir(wg.pm, startID) "Start title $(startTitle) is a redirected article"
+    @assert notRedir(wg.pm, endID) "End title $(endTitle) is a redirected article"
 
     deg, path = connectBFS(wg, startID, endID, verbose=verbose)
 
@@ -171,8 +171,8 @@ function reachability(
         numReached = length(explored)
         println("At $(s) degrees of separation $(ttl) reaches:")
         println("| $(numReached) articles")
-        println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia pages")
-        println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia pages")
+        println("| $(numReached * 100 / wg.pm.numpages)% of all Wikipedia articles")
+        println("| $(numReached * 100 / nzCount)% of all reachable Wikipedia articles")
     end
     
     if graph
@@ -180,23 +180,23 @@ function reachability(
         yscale("log")
         title("$(type)BFS expansion of $(ttl)")
         xlabel("Degree of separation")
-        ylabel("Number of new pages reached", fontsize=yfontsz)
-        savefig("output/bfsDif_$(norm(ttl))_deg$(s).png", dpi=dpi)
+        ylabel("Number of new articles reached", fontsize=yfontsz)
+        savefig("output/bfsDif_$(norm(ttl))_deg$(s).pdf", bbox_inches="tight")
         cla()
         
         cumseps = cumsum(separations)
         plot([i for i = 1:s], cumseps, color=color)
         title("$(type)BFS expansion of $(ttl)")
         xlabel("Degree of separation")
-        ylabel("Number of pages reached", fontsize=yfontsz)
-        savefig("output/bfsCum_$(norm(ttl))_deg$(s).png", dpi=dpi)
+        ylabel("Number of articles reached", fontsize=yfontsz)
+        savefig("output/bfsCum_$(norm(ttl))_deg$(s).pdf", bbox_inches="tight")
         cla()
 
         plot([i for i = 1:s], cumseps / nzCount, color=color)
         title("$(type)BFS expansion of $(ttl)")
         xlabel("Degree of separation")
-        ylabel("Number of pages reached (fraction of reachable)", fontsize=yfontsz)
-        savefig("output/bfsCumScaled_$(norm(ttl))_deg$(s).png", dpi=dpi)
+        ylabel("Number of articles reached (fraction of reachable)", fontsize=yfontsz)
+        savefig("output/bfsCumScaled_$(norm(ttl))_deg$(s).pdf", bbox_inches="tight")
         cla()
     end
 end
@@ -249,8 +249,8 @@ race(fwg, "Julia_(programming_language)", "Goychay_District")
 race(bwg, "Aeneid", "Tardigrade")
 
 philID = fwg.pm.title2id["Philosophy"]
-reachability(fwg, philID, length(bwdNZCounts); printEach=true, graph=true, type="Forward")
-reachability(bwg, philID, length(fwdNZCounts); printEach=true, graph=true, type="Backward")
+reachability(fwg, philID, length(bwdNZCounts); printEach=true, graph=true, type="Outbound")
+reachability(bwg, philID, length(fwdNZCounts); printEach=true, graph=true, type="Inbound")
 
 k = 10
 

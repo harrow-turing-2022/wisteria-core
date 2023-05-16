@@ -46,10 +46,10 @@ function logHistogram(
     end
 
     yscale(ysc)
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, dpi=dpi, bbox_inches="tight")
     cla()
 
     if fit
@@ -85,10 +85,10 @@ function loglogHistogram(
 
     xscale("log")
     yscale("log")
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, dpi=dpi, bbox_inches="tight")
     cla()
 
     if fit
@@ -106,10 +106,10 @@ function logHistogramScaled(
     yscale(ysc)
     ylim(0, yl)
     xlim(-2500, xl)
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, dpi=dpi, bbox_inches="tight")
     cla()
 end
 
@@ -124,10 +124,10 @@ function loglogHistogramScaled(
     xscale("log")
     ylim(0, yl)
     xlim(-2500, xl)
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, dpi=dpi, bbox_inches="tight")
     cla()
 end
 
@@ -136,10 +136,10 @@ function scat(
         xlab="Out-degree", ylab="In-degree", dpi=1000, sz=1
     )
     scatter(outdegrees, indegrees, s=sz, marker=".")
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, dpi=dpi, bbox_inches="tight")
     cla()
 end
 
@@ -147,15 +147,18 @@ function loglogscat(
         outdegrees, indegrees, fname, ttl;
         xlab="Out-degree", ylab="In-degree", dpi=1000, sz=1
     )
-    scatter(outdegrees, indegrees, s=sz, marker=".")
+    scatter(outdegrees, indegrees, s=sz, marker=".", alpha=1)
     yscale("log")
     xscale("log")
-    title(ttl)
+    # title(ttl)
     xlabel(xlab)
     ylabel(ylab)
-    savefig(fname, dpi=dpi)
+    savefig(fname, dpi=dpi, bbox_inches="tight")
     cla()
 end
+
+
+println("Correlation of in-degree and out-degree: $(cor(fwdCounts, bwdCounts))")
 
 
 arrs = [fwdCounts, fwdNZCounts, bwdCounts, bwdNZCounts]
@@ -170,6 +173,9 @@ for (a, n, un, p) in ProgressBar(zip(arrs, names, upnames, prefix))
     loglogHistogramScaled(a, "output/$(p)scaled_loglog_$(n).png", "Distribution of $(un)")
 end
 
+loglogHistogram(fwdCounts, "output/loglog_out-degree.png", ""; xlab="Article out-degree")
+loglogHistogram(bwdCounts, "output/loglog_in-degree.png", ""; xlab="Article in-degree")
+
 logHistogram(fwdCounts, "output/fit_outdegree.png", "Distribution of Out-degree"; fit=true, bins=0)
 logHistogram(bwdCounts, "output/fit_indegree.png", "Distribution of In-degree"; fit=true, bins=0)
 
@@ -183,12 +189,12 @@ analyse(bwdNZCounts, "Non-Zero In-Degrees")
 
 fwdE = sum(fwdCounts)
 fwdV = length(fwdCounts)
-fwdDensity = fwdE / (fwdV * (fwdV - 1))
+fwdDensity = fwdE / (fwdV^2)
 print("Outbound Graph: E = $(fwdE) | V = $(fwdV)")
 print("Density of outbound links: $(fwdDensity)")
 
 bwdE = sum(bwdCounts)
 bwdV = length(bwdCounts)
-bwdDensity = bwdE / (bwdV * (bwdV - 1))
+bwdDensity = bwdE / (bwdV^2)
 print("Inbound Graph: E = $(bwdE) | V = $(bwdV)")
 print("Density of inbound links: $(bwdDensity)")
