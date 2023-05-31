@@ -15,16 +15,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 =#
 
-
+import Pkg
+import JSON
 include("version.jl")
 
 
-import Pkg
 Pkg.add(["EzXML", "FileIO", "JLD2", "JSON", "ProgressBars", "PyPlot", "CurveFit",
          "Pingouin", "Distributions", "DataStructures", "Genie"])
 println("✅ All Julia packages installed")
 
 safemake(dir) = !ispath(dir) && mkdir(dir)
+safemake("data")
 safemake("logs")
 safemake("ser")
 println("✅ All directories created")

@@ -24,13 +24,12 @@ docs/site/
 Manifest.toml
 
 # Wisteria-specific files
+data/
 logs/
 ser/
 graph/
 backgraph/
 graph_test/
-data/*
-!data/multistream-urls.txt
 
 # Saturn-generated files
 saturn_graph/
