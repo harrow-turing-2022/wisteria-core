@@ -16,19 +16,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 =#
 
 
-include("version.jl")
-include("wikigraph.jl")
-
-if ispath("graph/links.qria")
-    println("Loading Wikigraph")
-    wg = loadwgQuick("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
-    println("Serialising")
-    toEdgeTxt("ser/edges.txt", wg)
-else
-    println("Loading Wikigraph")
-    wg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
-    println("Saving Wikigraph as QuickWisteria file for future")
-    savewgQuick("graph/", wg)
-    println("Serialising")
-    toEdgeTxt("ser/edges.txt", wg; uniformWeight=true)
-end
+DATE = "20230520"

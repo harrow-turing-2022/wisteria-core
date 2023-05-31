@@ -16,8 +16,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 =#
 
 
+include("version.jl")
+
+
 import Pkg
-Pkg.add(["EzXML", "FileIO", "JLD2", "ProgressBars", "PyPlot", "CurveFit",
+Pkg.add(["EzXML", "FileIO", "JLD2", "JSON", "ProgressBars", "PyPlot", "CurveFit",
          "Pingouin", "Distributions", "DataStructures", "Genie"])
 println("✅ All Julia packages installed")
 
@@ -54,10 +57,22 @@ else
     println("✅ All required commands available")
 end
 
-if !ispath("data/enwiki-20230101-all-titles-in-ns0")
-    using Downloads
-    run(`curl https://dumps.wikimedia.org/enwiki/20230101/enwiki-20230101-all-titles-in-ns0.gz --output enwiki-20230101-all-titles-in-ns0.gz`)
-    run(`7z x enwiki-20230101-all-titles-in-ns0.gz -odata`)
-    rm("enwiki-20230101-all-titles-in-ns0.gz")
+
+if !ispath("data/enwiki-$(DATE)-all-titles-in-ns0")
+    run(`curl https://dumps.wikimedia.org/enwiki/$(DATE)/enwiki-$(DATE)-all-titles-in-ns0.gz --output enwiki-$(DATE)-all-titles-in-ns0.gz`)
+    run(`7z x enwiki-$(DATE)-all-titles-in-ns0.gz -odata`)
+    rm("enwiki-$(DATE)-all-titles-in-ns0.gz")
 end
-println("✅ All titles downloaded")
+if !ispath("data/dumpstatus.json")
+    run(`curl https://dumps.wikimedia.org/enwiki/$(DATE)/dumpstatus.json --output data/dumpstatus.json`)
+end
+println("✅ All prerequisite files downloaded")
+
+status = JSON.parsefile("data/dumpstatus.json")
+multistreams = collect(keys(status["jobs"]["articlesmultistreamdump"]["files"]))
+filter!(x -> x[43:48] != "-index", multistreams)
+multistreams = sort( multistreams; by = x -> parse(Int64, split(split(x, ".xml-p")[2], "p")[1]) )
+write("data/multistream-urls.txt", join(multistreams, "\n"))
+println("✅ Multistream URLs generated")
+
+println("✅ Setup complete")

@@ -61,7 +61,7 @@ add https://github.com/clementpoiret/Pingouin.jl.git
 
 Since the `Pageman` object of our system uses a relative path to reference the list of titles on Wikipedia, please make sure that:
 
-- The file `enwiki-20230101-all-titles-in-ns0` is present in `./data` (this should be done automatically by `setup.jl`)
+- The file `enwiki-$(DATE)-all-titles-in-ns0` is present in `./data` (this should be done automatically by `setup.jl`)
 - You are running any Julia scripts from the root of this repository (i.e. where you can see `explore.jl`, `parser.jl`, `./data`, `./graph`, etc.)
 
 Otherwise, things might not work!
@@ -85,12 +85,13 @@ To load a Wikigraph:
 
 ```julia
 # Include wisteria graph loading functions
+include("version.jl")
 include("utils.jl")
 include("wikigraph.jl")
 
 # Load a Wikigraph object
 wg = loadwg("path/to/graph-directory", "path/to/all-titles-file")
-# E.g. wg = loadwg("graph/", "data/enwiki-20230101-all-titles-in-ns0")
+# E.g. wg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
 ```
 
 Attributes of a `Wikigraph` object:

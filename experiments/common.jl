@@ -25,15 +25,16 @@ using ProgressBars
 using Distributions
 using DataStructures
 
+include("../version.jl")
 include("../wikigraph.jl")
 include("exutils.jl")
 include("indices.jl")
 
-fwg = loadwgQuick("../graph/", "../data/enwiki-20230101-all-titles-in-ns0")
+fwg = loadwgQuick("../graph/", "../data/enwiki-$(DATE)-all-titles-in-ns0")
 fwdCounts, fwdCountIDs = countlinks(fwg)
 fwdNZCounts = [i for i in fwdCounts if i != 0]
 
-bwg = loadwgQuick("../backgraph/", "../data/enwiki-20230101-all-titles-in-ns0")
+bwg = loadwgQuick("../backgraph/", "../data/enwiki-$(DATE)-all-titles-in-ns0")
 bwdCounts, bwdCountIDs = countlinks(bwg)
 bwdNZCounts = [i for i in bwdCounts if i != 0]
 

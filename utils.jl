@@ -22,7 +22,11 @@ using JLD2, ProgressBars
 # Utility functions
 
 function normalise(title::String)
-    return replace(uppercasefirst(strip(title)), " " => "_")
+    title = strip(title)
+    if !startswith(title, "ß")
+        title = uppercasefirst(title)
+    end
+    return replace(title, " " => "_")
 end
 
 checkfile(f) = ispath(f) && rm(f)

@@ -16,10 +16,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 =#
 
 
+include("version.jl")
 include("wikigraph.jl")
 
 println("Loading Wikigraph from checkpoint")
-@time wg = loadwg("graph/", "data/enwiki-20230101-all-titles-in-ns0")
+@time wg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
 
 println("Serialising for LGL (.NCOL)")
 @time toNCOL("ser/graph.ncol", wg; uniformWeight=true)

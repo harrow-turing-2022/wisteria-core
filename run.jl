@@ -17,16 +17,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 using Downloads
+include("version.jl")
 include("parser.jl")
 include("wikigraph.jl")
 
 function dunzip(fname)
-    run(`curl https://dumps.wikimedia.org/enwiki/20230101/$fname --output $fname`)
+    run(`curl https://dumps.wikimedia.org/enwiki/$DATE/$fname --output $fname`)
     run(`7z x $fname -odata`)
     rm(fname)
 end
 
-files = [String(strip(i)) for i in split(read("data/multistream-urls.txt", String), "\n")]
+files = [String(strip(i)) for i in split(strip(read("data/multistream-urls.txt", String)), "\n")]
 start = length(ARGS) == 0 ? 1 : parse(Int64, ARGS[1])
 
 for i = start:length(files)
@@ -50,7 +51,7 @@ for i = start:length(files)
     wg = mineXML(
         "data/$(xmlname)",
         "graph/",
-        "data/enwiki-20230101-all-titles-in-ns0",
+        "data/enwiki-$(DATE)-all-titles-in-ns0",
         "logs/$(i)/title_errors.txt",
         numpages
     )
@@ -58,9 +59,9 @@ for i = start:length(files)
     rm("data/$(xmlname)")
 end
 
-fwg = loadwg("graph/", "data/enwiki-20230101-all-titles-in-ns0")
+fwg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
 savewgQuick("graph/", fwg)
 
-bwg = loadwg("graph/", "data/enwiki-20230101-all-titles-in-ns0"; backwards=true)
+bwg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0"; backwards=true)
 savewg("backgraph/", bwg)
 savewgQuick("backgraph/", bwg)
