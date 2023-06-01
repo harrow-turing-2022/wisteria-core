@@ -40,6 +40,7 @@ else
     @time wgraph = Wikigraph("data/enwiki-$(DATE)-all-titles-in-ns0")
 end
 
+println(wgraph)
 
 for i = start:length(files)
     if !ispath("logs/$(i)")
