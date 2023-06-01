@@ -116,19 +116,11 @@ end
 
 function mineXML(
         xmlPath::AbstractString,
+        wg::Wikigraph,
         wgDir::AbstractString,
-        titlesPath::AbstractString,
         logPath::AbstractString,
         numPages::Integer
     )
-    if wgIntegrity(wgDir)
-        println("Loading Wikigraph from last checkpoint")
-        @time wg = loadwg(wgDir, titlesPath)
-    else
-        println("Initialising empty Wikigraph from titles")
-        @time wg = Wikigraph(titlesPath)
-    end
-
     println("\nTotal page count: $(wg.pm.totalpages)")
 
     println("\nReading XML document")

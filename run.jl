@@ -30,6 +30,17 @@ end
 files = [String(strip(i)) for i in split(strip(read("data/multistream-urls.txt", String)), "\n")]
 start = length(ARGS) == 0 ? 1 : parse(Int64, ARGS[1])
 
+
+# Load wg from `graph/` if checkpointed or initialise empty wg
+if wgIntegrity("graph/")
+    println("Loading Wikigraph from last checkpoint")
+    @time wg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
+else
+    println("Initialising empty Wikigraph from titles")
+    @time wg = Wikigraph("data/enwiki-$(DATE)-all-titles-in-ns0")
+end
+
+
 for i = start:length(files)
     if !ispath("logs/$(i)")
         mkdir("logs/$(i)")
@@ -47,17 +58,24 @@ for i = start:length(files)
         dunzip(zipname)
     end
     
-    # Loads wg from `graph/`, mines XML to update wg, and saves it back into `graph`
+    # Mines XML to update wg, and saves it back into `graph`    
     wg = mineXML(
         "data/$(xmlname)",
+        wg,
         "graph/",
-        "data/enwiki-$(DATE)-all-titles-in-ns0",
         "logs/$(i)/title_errors.txt",
         numpages
     )
 
     rm("data/$(xmlname)")
 end
+
+# Clear memory
+wg = 0
+gc()
+
+
+# Serialise graphs
 
 fwg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
 savewgQuick("graph/", fwg)
