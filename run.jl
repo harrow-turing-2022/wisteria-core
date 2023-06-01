@@ -34,10 +34,10 @@ start = length(ARGS) == 0 ? 1 : parse(Int64, ARGS[1])
 # Load wg from `graph/` if checkpointed or initialise empty wg
 if wgIntegrity("graph/")
     println("Loading Wikigraph from last checkpoint")
-    @time wg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
+    @time( global wg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0") )
 else
     println("Initialising empty Wikigraph from titles")
-    @time wg = Wikigraph("data/enwiki-$(DATE)-all-titles-in-ns0")
+    @time( global wg = Wikigraph("data/enwiki-$(DATE)-all-titles-in-ns0") )
 end
 
 
