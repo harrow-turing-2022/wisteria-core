@@ -54,22 +54,22 @@ function savewg(
     if !ispath(fdir) 
         mkpath(fdir)
     end
-    savepm(joinpath(fdir, "pm.jld2"), wg.pm)
-    saveLinks(joinpath(fdir, "links.ria"), wg.links, wg.pm)
+    savepm(safejoin(fdir, "pm.jld2"), wg.pm)
+    saveLinks(safejoin(fdir, "links.ria"), wg.links, wg.pm)
 end
 
 function loadwg(fdir::AbstractString, titlesPath::AbstractString; backwards::Bool=false)
-    pm = loadpm(joinpath(fdir, "pm.jld2"), titlesPath)
+    pm = loadpm(safejoin(fdir, "pm.jld2"), titlesPath)
     if backwards
-        links = loadLinks(joinpath(fdir, "links.ria"), pm; backwards=true)
+        links = loadLinks(safejoin(fdir, "links.ria"), pm; backwards=true)
     else
-        links = loadLinks(joinpath(fdir, "links.ria"), pm)
+        links = loadLinks(safejoin(fdir, "links.ria"), pm)
     end
     return Wikigraph(pm, links)
 end
 
 function wgIntegrity(fdir::AbstractString)
-    return ispath(joinpath(fdir, "pm.jld2")) && ispath(joinpath(fdir, "links.ria"))
+    return ispath(safejoin(fdir, "pm.jld2")) && ispath(safejoin(fdir, "links.ria"))
 end
 
 function savewgQuick(
@@ -79,15 +79,15 @@ function savewgQuick(
     if !ispath(fdir) 
         mkpath(fdir)
     end
-    if !ispath(joinpath(fdir, "pm.jld2"))
-        savepm(joinpath(fdir, "pm.jld2"), wg.pm)
+    if !ispath(safejoin(fdir, "pm.jld2"))
+        savepm(safejoin(fdir, "pm.jld2"), wg.pm)
     end
-    saveLinksQuick(joinpath(fdir, "links.qria"), wg.links)
+    saveLinksQuick(safejoin(fdir, "links.qria"), wg.links)
 end
 
 function loadwgQuick(fdir::AbstractString, titlesPath::AbstractString)
-    pm = loadpm(joinpath(fdir, "pm.jld2"), titlesPath)
-    links = loadLinksQuick(joinpath(fdir, "links.qria"))
+    pm = loadpm(safejoin(fdir, "pm.jld2"), titlesPath)
+    links = loadLinksQuick(safejoin(fdir, "links.qria"))
     return WikigraphUnweighed(pm, links)
 end
 

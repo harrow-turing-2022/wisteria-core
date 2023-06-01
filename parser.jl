@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using EzXML
 using ProgressBars
+include("utils.jl")
 include("wikigraph.jl")
 
 
@@ -202,7 +203,10 @@ function mineXML(
     end
 
     println("\nSaving Wikigraph")
-    @time savewg(wgDir, wg)
+    tmpDir = safejoin(wgDir, "temp")
+    ispath(tmpDir) || mkdir(tmpDir)
+    @time savewg(tmpDir, wg)
+    run(`cp $(tmpDir)/\* $(wgDir) -r`)
 
     return wg
 end

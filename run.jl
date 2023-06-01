@@ -29,8 +29,11 @@ end
 
 function main(wg, start, files)
     oldwg = wg
+    wg = 0
 
     for i = start:length(files)
+        GC.gc()
+
         if !ispath("logs/$(i)")
             mkdir("logs/$(i)")
         elseif ispath("logs/$(i)/title_errors.txt")
@@ -56,6 +59,7 @@ function main(wg, start, files)
             numpages
         )
         oldwg = newwg
+        newwg = 0
     
         rm("data/$(xmlname)")
     end
@@ -87,6 +91,7 @@ GC.gc()
 
 
 # Serialise graphs
+rm("graph/temp")
 
 fwg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
 savewgQuick("graph/", fwg)

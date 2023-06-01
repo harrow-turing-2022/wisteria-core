@@ -30,6 +30,7 @@ function normalise(title::String)
 end
 
 checkfile(f) = ispath(f) && rm(f)
+safejoin(a, b) = replace(joinpath(a, b), "\\"=>"/")
 
 # Page management
 
