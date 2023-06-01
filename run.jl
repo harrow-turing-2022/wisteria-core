@@ -79,11 +79,11 @@ gc()
 
 fwg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
 savewgQuick("graph/", fwg)
-println("✅ Forward graph serialisation complete")
+println("✅ Forward graph serialisation complete [$(fwg.pm.numpages) articles]")
 
 bwg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0"; backwards=true)
 savewg("backgraph/", bwg)
 savewgQuick("backgraph/", bwg)
-println("✅ Backward (transpose) graph serialisation complete")
+println("✅ Backward (transpose) graph serialisation complete [$(bwg.pm.numpages) articles]")
 
 println("✅ WikiGraph generation complete")
