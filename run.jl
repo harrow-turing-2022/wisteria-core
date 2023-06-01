@@ -61,7 +61,11 @@ end
 
 fwg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
 savewgQuick("graph/", fwg)
+println("✅ Forward graph serialisation complete")
 
 bwg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0"; backwards=true)
 savewg("backgraph/", bwg)
 savewgQuick("backgraph/", bwg)
+println("✅ Backward (transpose) graph serialisation complete")
+
+println("✅ WikiGraph generation complete")
