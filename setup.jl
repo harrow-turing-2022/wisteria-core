@@ -16,7 +16,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 =#
 
 import Pkg
-import JSON
 include("version.jl")
 
 
@@ -69,6 +68,7 @@ if !ispath("data/dumpstatus.json")
 end
 println("✅ All prerequisite files downloaded")
 
+import JSON
 status = JSON.parsefile("data/dumpstatus.json")
 multistreams = collect(keys(status["jobs"]["articlesmultistreamdump"]["files"]))
 filter!(x -> x[43:48] != "-index", multistreams)
