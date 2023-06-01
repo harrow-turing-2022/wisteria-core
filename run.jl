@@ -27,11 +27,44 @@ function dunzip(fname)
     rm(fname)
 end
 
-files = [String(strip(i)) for i in split(strip(read("data/multistream-urls.txt", String)), "\n")]
+function main(wg, start, files)
+    for i = start:length(files)
+        if !ispath("logs/$(i)")
+            mkdir("logs/$(i)")
+        elseif ispath("logs/$(i)/title_errors.txt")
+            rm("logs/$(i)/title_errors.txt")
+        end
+    
+        zipname = files[i]
+        xmlname = String(split(zipname, ".bz2")[1])
+        numpages = parse(Int64, split(xmlname, "p")[end]) - parse(Int64, split(xmlname, "p")[end-1]) + 1
+    
+        println("\n[$(i)/$(length(files))] Starting on $(numpages) pages from $(zipname)")
+    
+        if !ispath("data/$(xmlname)")
+            dunzip(zipname)
+        end
+        
+        # Mines XML to update wg, and saves it back into `graph`    
+        wg = mineXML(
+            "data/$(xmlname)",
+            wg,
+            "graph/",
+            "logs/$(i)/title_errors.txt",
+            numpages
+        )
+    
+        rm("data/$(xmlname)")
+    end
+
+    return wg
+end
+
+
 start = length(ARGS) == 0 ? 1 : parse(Int64, ARGS[1])
+files = [String(strip(i)) for i in split(strip(read("data/multistream-urls.txt", String)), "\n")]
 
-
-# Load wg from `graph/` if checkpointed or initialise empty wg
+# Load wg from `graph/` if checkpointed, else initialise empty wg
 if wgIntegrity("graph/")
     println("Loading Wikigraph from last checkpoint")
     @time wgraph = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
@@ -40,38 +73,14 @@ else
     @time wgraph = Wikigraph("data/enwiki-$(DATE)-all-titles-in-ns0")
 end
 
-for i = start:length(files)
-    if !ispath("logs/$(i)")
-        mkdir("logs/$(i)")
-    elseif ispath("logs/$(i)/title_errors.txt")
-        rm("logs/$(i)/title_errors.txt")
-    end
 
-    zipname = files[i]
-    xmlname = String(split(zipname, ".bz2")[1])
-    numpages = parse(Int64, split(xmlname, "p")[end]) - parse(Int64, split(xmlname, "p")[end-1]) + 1
+# Run main parsing logic
+main(wgraph, start, files)
 
-    println("\n[$(i)/$(length(files))] Starting on $(numpages) pages from $(zipname)")
-
-    if !ispath("data/$(xmlname)")
-        dunzip(zipname)
-    end
-    
-    # Mines XML to update wg, and saves it back into `graph`    
-    global wgraph = mineXML(
-        "data/$(xmlname)",
-        wgraph,
-        "graph/",
-        "logs/$(i)/title_errors.txt",
-        numpages
-    )
-
-    rm("data/$(xmlname)")
-end
 
 # Clear memory
 wgraph = 0
-gc()
+GC.gc()
 
 
 # Serialise graphs

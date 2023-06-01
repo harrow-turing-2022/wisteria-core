@@ -161,7 +161,7 @@ function mineXML(
                 # println("========== SKIPPED $(title) ==========\n")
 
             elseif children[end-1].name == "redirect"
-                redir = normalise(children[end - 1]["title"])
+                redir = normalise(children[end-1]["title"])
                 if haskey(wg.pm.title2id, redir)
                     tie!(wg.pm, wg.pm.title2id[title], wg.pm.title2id[redir])
                 end
