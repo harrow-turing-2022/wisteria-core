@@ -122,6 +122,7 @@ function mineXML(
         numPages::Integer
     )
     println("\nTotal page count: $(wg.pm.totalpages)")
+    println("\nUnredirected article count: $(wg.pm.numpages)")
 
     println("\nReading XML document")
     @time doc = readxml(xmlPath)
@@ -162,7 +163,7 @@ function mineXML(
             elseif children[end-1].name == "redirect"
                 redir = normalise(children[end - 1]["title"])
                 if haskey(wg.pm.title2id, redir)
-                    tie(wg.pm, wg.pm.title2id[title], wg.pm.title2id[redir])
+                    tie!(wg.pm, wg.pm.title2id[title], wg.pm.title2id[redir])
                 end
                 # println("========== REDIRECTED $(title) ==========\n")
             
@@ -196,8 +197,8 @@ function mineXML(
 
         printlog(s) = (write(logs, s); println(s))
         printlog("\nAverage number of links: $(trunc(sum(numlinks)/length(numlinks), digits=3))\n")
-        printlog("Pages with links: $(length(numlinks))\n")
-        printlog("Number of pages (not counting redirects): $(wg.pm.numpages)")
+        printlog("Articles with links: $(length(numlinks))\n")
+        printlog("Number of articles (not counting redirects): $(wg.pm.numpages)")
     end
 
     println("\nSaving Wikigraph")

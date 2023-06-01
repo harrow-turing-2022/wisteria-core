@@ -85,7 +85,7 @@ function traceRedir!(
     return red
 end
 
-function tie(
+function tie!(
         pm::Pageman,
         srcId::Integer,
         trgId::Integer
