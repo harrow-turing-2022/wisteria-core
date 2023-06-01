@@ -59,7 +59,7 @@ for i = start:length(files)
     end
     
     # Mines XML to update wg, and saves it back into `graph`    
-    wgraph = mineXML(
+    global wgraph = mineXML(
         "data/$(xmlname)",
         wgraph,
         "graph/",
