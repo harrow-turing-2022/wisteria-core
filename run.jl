@@ -28,6 +28,8 @@ function dunzip(fname)
 end
 
 function main(wg, start, files)
+    oldwg = wg
+
     for i = start:length(files)
         if !ispath("logs/$(i)")
             mkdir("logs/$(i)")
@@ -46,18 +48,19 @@ function main(wg, start, files)
         end
         
         # Mines XML to update wg, and saves it back into `graph`    
-        wg = mineXML(
+        newwg = mineXML(
             "data/$(xmlname)",
-            wg,
+            oldwg,
             "graph/",
             "logs/$(i)/title_errors.txt",
             numpages
         )
+        oldwg = newwg
     
         rm("data/$(xmlname)")
     end
 
-    return wg
+    return oldwg
 end
 
 
