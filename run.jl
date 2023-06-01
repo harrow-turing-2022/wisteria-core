@@ -34,10 +34,10 @@ start = length(ARGS) == 0 ? 1 : parse(Int64, ARGS[1])
 # Load wg from `graph/` if checkpointed or initialise empty wg
 if wgIntegrity("graph/")
     println("Loading Wikigraph from last checkpoint")
-    @time( global wg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0") )
+    @time wgraph = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
 else
     println("Initialising empty Wikigraph from titles")
-    @time( global wg = Wikigraph("data/enwiki-$(DATE)-all-titles-in-ns0") )
+    @time wgraph = Wikigraph("data/enwiki-$(DATE)-all-titles-in-ns0")
 end
 
 
@@ -59,9 +59,9 @@ for i = start:length(files)
     end
     
     # Mines XML to update wg, and saves it back into `graph`    
-    wg = mineXML(
+    wgraph = mineXML(
         "data/$(xmlname)",
-        wg,
+        wgraph,
         "graph/",
         "logs/$(i)/title_errors.txt",
         numpages
@@ -71,7 +71,7 @@ for i = start:length(files)
 end
 
 # Clear memory
-wg = 0
+wgraph = 0
 gc()
 
 
