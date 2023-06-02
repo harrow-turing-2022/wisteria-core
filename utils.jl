@@ -60,14 +60,28 @@ function isRedir(
         wg::Wikigraph,
         id::Integer
     )
-    return (wg.pm.redirs[id] != id) && (length(wg.links[id]) == 0)
+    return (wg.pm.redirs[id] != id) # && (length(wg.links[id]) == 0)
+end
+
+function isRedir(
+        wg::WikigraphUnweighed,
+        id::Integer
+    )
+    return (wg.pm.redirs[id] != id) # && (length(wg.links[id]) == 0)
 end
 
 function notRedir(
         wg::Wikigraph,
         id::Integer
     )
-    return (wg.pm.redirs[id] == id) || (length(wg.links[id]) > 0)
+    return (wg.pm.redirs[id] == id) # || (length(wg.links[id]) > 0)
+end
+
+function notRedir(
+        wg::WikigraphUnweighed,
+        id::Integer
+    )
+    return (wg.pm.redirs[id] == id) # || (length(wg.links[id]) > 0)
 end
 
 function traceRedir!(
