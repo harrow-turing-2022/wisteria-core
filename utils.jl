@@ -75,11 +75,10 @@ function traceRedir!(
         id::Integer
     )
     red = pm.redirs[id]
+    (red == 0) && (return red)
+    
     next = pm.redirs[red]
-
-    if red == next
-        return red
-    end
+    (red == next) && (return red)
 
     intermediates = Set{Int32}([id])
 
@@ -141,7 +140,7 @@ function saveLinks(
     checkfile(fpath)
 
     open(fpath, "a") do f
-        for i::Int32 in ProgressBar(eachindex(links))
+        for i::Int32 in ProgressBar(1:length(links))
             write(f, i)
             written = Int32[]
             for (t, w) in links[i]
@@ -224,7 +223,7 @@ function saveLinksQuick(
     checkfile(fpath)
 
     open(fpath, "a") do f
-        for i::Int32 in ProgressBar(eachindex(links))
+        for i::Int32 in ProgressBar(1:length(links))
             for (t, w) in links[i]
                 write(f, t)
             end
@@ -242,7 +241,7 @@ function saveLinksQuick(
     checkfile(fpath)
 
     open(fpath, "a") do f
-        for i::Int32 in ProgressBar(eachindex(links))
+        for i::Int32 in ProgressBar(1:length(links))
             for t in links[i]
                 write(f, t)
             end
