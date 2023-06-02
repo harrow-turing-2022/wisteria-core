@@ -91,7 +91,7 @@ GC.gc()
 
 
 # Serialise graphs
-rm("graph/temp")
+rm("graph/temp"; recursive=true)
 
 fwg = loadwg("graph/", "data/enwiki-$(DATE)-all-titles-in-ns0")
 savewgQuick("graph/", fwg)
