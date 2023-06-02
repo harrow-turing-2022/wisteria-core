@@ -57,17 +57,17 @@ mutable struct Pageman
 end
 
 function isRedir(
-        pm::Pageman,
+        wg::Wikigraph,
         id::Integer
     )
-    return pm.redirs[id] != id
+    return (wg.pm.redirs[id] != id) && (length(wg.links[id]) != 0)
 end
 
 function notRedir(
-        pm::Pageman,
+        wg::Wikigraph,
         id::Integer
     )
-    return pm.redirs[id] == id
+    return !isRedir(wg, id)
 end
 
 function traceRedir!(

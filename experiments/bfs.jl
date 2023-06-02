@@ -141,8 +141,8 @@ function race(wg::WikigraphUnweighed, startTitle::AbstractString, endTitle::Abst
     startID = wg.pm.title2id[startTitle]
     endID = wg.pm.title2id[endTitle]
 
-    @assert notRedir(wg.pm, startID) "Start title $(startTitle) is a redirected article"
-    @assert notRedir(wg.pm, endID) "End title $(endTitle) is a redirected article"
+    @assert notRedir(wg, startID) "Start title $(startTitle) is a redirected article"
+    @assert notRedir(wg, endID) "End title $(endTitle) is a redirected article"
 
     deg, path = connectBFS(wg, startID, endID, verbose=verbose)
 
@@ -231,7 +231,7 @@ function findIslands()
 
     for idx in iter
         srcID = bwdCountIDs[idx]
-        (srcID in allExplored || isRedir(fwg.pm, srcID)) && (continue)
+        (srcID in allExplored || isRedir(fwg, srcID)) && (continue)
         
         explored = bidirectionalBFS(fwg, bwg, srcID)
         union!(allExplored, explored)

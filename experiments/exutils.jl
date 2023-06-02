@@ -25,7 +25,7 @@ function countlinks(wg::Union{Wikigraph, WikigraphUnweighed})
     countIDs = Int32[]
 
     for srcID in ProgressBar(1:wg.pm.totalpages)
-        if notRedir(wg.pm, srcID)
+        if notRedir(wg, srcID)
             push!(countIDs, srcID)
             push!(counts, length(wg.links[srcID]))
         end
@@ -38,7 +38,7 @@ function countSinks(wg::Union{Wikigraph, WikigraphUnweighed})
     sinks = Int32[]
 
     for srcID in ProgressBar(1:wg.pm.totalpages)
-        if notRedir(wg.pm, srcID) && length(wg.links[srcID] == 0)
+        if notRedir(wg, srcID) && length(wg.links[srcID] == 0)
             push!(sinks, srcID)
         end
     end

@@ -35,7 +35,7 @@ function pageAnalysis(wg, isoPath, name)
     
         for i in ProgressBar(1:wg.pm.totalpages)
 
-            if isRedir(wg.pm, i)
+            if isRedir(wg, i)
                 redirCount += 1
             
             elseif length(wg.links[i]) > 0

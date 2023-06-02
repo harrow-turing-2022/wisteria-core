@@ -103,7 +103,7 @@ function toEdgeTxt(
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if notRedir(wg.pm, srcID)
+            if notRedir(wg, srcID)
                 for (_trgID, w) in wg.links[srcID]
                     trgID = traceRedir!(wg.pm, _trgID)
                     if uniformWeight
@@ -128,7 +128,7 @@ function toEdgeTxt(
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if notRedir(wg.pm, srcID)
+            if notRedir(wg, srcID)
                 for trgID in wg.links[srcID]
                     write(f, "$(son)$(srcID)$(delim)$(son)$(trgID)$(eol)")
                 end
@@ -148,7 +148,7 @@ function toTitleTxt(
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if notRedir(wg.pm, srcID)
+            if notRedir(wg, srcID)
                 write(f, "$(son)$(srcID)$(delim)$(wg.pm.id2title[srcID])$(eol)")
             end
         end
@@ -167,7 +167,7 @@ function toNCOL(
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if notRedir(wg.pm, srcID)
+            if notRedir(wg, srcID)
                 for (_trgID, w) in wg.links[srcID]
                     trgID = traceRedir!(wg.pm, _trgID)
 
@@ -200,7 +200,7 @@ function toLGL(
 
     open(fpath, "a") do f
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if notRedir(wg.pm, srcID)
+            if notRedir(wg, srcID)
 
                 write(f, "# $(son)$(srcID)$(eol)")
 
@@ -242,7 +242,7 @@ function toCosmo(
         end
 
         for srcID in ProgressBar(1:wg.pm.totalpages)
-            if notRedir(wg.pm, srcID)
+            if notRedir(wg, srcID)
                 for (_trgID, w) in wg.links[srcID]
                     trgID = traceRedir!(wg.pm, _trgID)
 

@@ -104,7 +104,7 @@ function tarjan(wg::WikigraphUnweighed, rwg::WikigraphUnweighed)
         end
     end
 
-    trueIDs = [i for i = 1:wg.pm.totalpages if notRedir(wg.pm, i)]
+    trueIDs = [i for i = 1:wg.pm.totalpages if notRedir(wg, i)]
 
     for u in ProgressBar(trueIDs)
         (times[u] == 0) && strongConnect(u)
@@ -224,7 +224,7 @@ maxIdx = argmax(sizes)
 println("Wikipedia has $(numSCC) SCCs")
 println("Biggest SCC is codenamed the *$(fwg.pm.id2title[collect(scc[maxIdx])[begin]]) cluster*")
 
-sinks = Set{Int32}([i for i = 1:fwg.pm.totalpages if notRedir(fwg.pm, i) && length(fwg.links[i]) == 0])
+sinks = Set{Int32}([i for i = 1:fwg.pm.totalpages if notRedir(fwg, i) && length(fwg.links[i]) == 0])
 initialComps = Set{Int32}()
 for i in scc
     if length(i) == 1
