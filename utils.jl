@@ -21,6 +21,9 @@ using JLD2, ProgressBars
 
 # Utility functions
 
+checkfile(f) = ispath(f) && rm(f)
+safejoin(a, b) = replace(joinpath(a, b), "\\"=>"/")
+
 function normalise(title::String)
     title = strip(title)
     if !startswith(title, "ß")
@@ -29,8 +32,11 @@ function normalise(title::String)
     return replace(title, " " => "_")
 end
 
-checkfile(f) = ispath(f) && rm(f)
-safejoin(a, b) = replace(joinpath(a, b), "\\"=>"/")
+function cpDirToDir(srcDir::AbstractString, dstDir::AbstractString; force::Bool=false)
+    for fname in readdir(srcDir)
+        cp(safejoin(srcDir, fname), safejoin(dstDir, fname); force=force)
+    end
+end
 
 # Page management
 

@@ -21,13 +21,13 @@ include("version.jl")
 include("parser.jl")
 include("wikigraph.jl")
 
-function dunzip(fname)
+function dunzip(fname::AbstractString)
     run(`curl https://dumps.wikimedia.org/enwiki/$DATE/$fname --output $fname`)
     run(`7z x $fname -odata`)
     rm(fname)
 end
 
-function main(wg, start, files)
+function main(wg::Wikigraph, start::Integer, files::Vector{AbstractString})
     oldwg = wg
     wg = 0
 

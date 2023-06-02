@@ -206,7 +206,7 @@ function mineXML(
     tmpDir = safejoin(wgDir, "temp")
     ispath(tmpDir) || mkdir(tmpDir)
     @time savewg(tmpDir, wg)
-    run(`cp $(tmpDir)/\* $(wgDir) -r`)
+    cpDirToDir(tmpDir, wgDir; force=true)
 
     return wg
 end
