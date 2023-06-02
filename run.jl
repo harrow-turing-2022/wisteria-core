@@ -27,7 +27,7 @@ function dunzip(fname::AbstractString)
     rm(fname)
 end
 
-function main(wg::Wikigraph, start::Integer, files::Vector{AbstractString})
+function main(wg::Wikigraph, start::Integer, files::Vector{String})
     oldwg = wg
     wg = 0
 
