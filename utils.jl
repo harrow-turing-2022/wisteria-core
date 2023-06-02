@@ -67,7 +67,7 @@ function notRedir(
         wg::Wikigraph,
         id::Integer
     )
-    return !isRedir(wg, id)
+    return (wg.pm.redirs[id] == id) || (length(wg.links[id]) > 0)
 end
 
 function traceRedir!(
