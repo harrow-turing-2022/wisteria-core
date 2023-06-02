@@ -74,17 +74,26 @@ function traceRedir!(
         pm::Pageman,
         id::Integer
     )
-    intermediates = []
     red = pm.redirs[id]
     next = pm.redirs[red]
 
-    while red != next
-        push!(intermediates, red)
-        red = pm.redirs[next]
-        next = pm.redirs[red]
+    if red == next
+        return red
     end
 
-    pm.redirs[id] = red
+    intermediates = Set{Int32}([id])
+
+    while red != next
+        if red ∉ intermediates
+            push!(intermediates, red)
+            red = pm.redirs[next]
+            next = pm.redirs[red]
+        else
+            red = 0
+            break
+        end
+    end
+
     for i in intermediates
         pm.redirs[i] = red
     end
@@ -137,7 +146,9 @@ function saveLinks(
             written = Int32[]
             for (t, w) in links[i]
                 r = traceRedir!(pm, t)
-                if !(r in written)
+                if r == 0
+                    println("!Redirect loop! Link $(i)->$(t) ignored.")
+                elseif r ∉ written
                     write(f, r, w, Int32(0))
                     push!(written, r)
                 end
@@ -181,7 +192,9 @@ function loadLinks(fpath::AbstractString, pm::Pageman; backwards::Bool=false)
                 @assert c >= 0 "File is corrupted (weight <= 0)"
                 
                 trg = traceRedir!(pm, cache)
-                if backwards
+                if trg == 0
+                    println("!Redirect loop! Fwd link $(counter)->$(cache) ignored.")
+                elseif backwards
                     (counter => c) ∉ links[trg] && push!(links[trg], counter => c)
                 else
                     (trg => c) ∉ links[counter] && push!(links[counter], trg => c)
