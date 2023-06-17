@@ -47,6 +47,34 @@ function link(
     push!(wg.links[srcID], trgID => weight)
 end
 
+function isRedir(
+        wg::Wikigraph,
+        id::Integer
+    )
+    return isRedir(wg.pm, id)
+end
+
+function isRedir(
+        wg::WikigraphUnweighed,
+        id::Integer
+    )
+    return isRedir(wg.pm, id)
+end
+
+function notRedir(
+        wg::Wikigraph,
+        id::Integer
+    )
+    return notRedir(wg.pm, id)
+end
+
+function notRedir(
+        wg::WikigraphUnweighed,
+        id::Integer
+    )
+    return notRedir(wg.pm, id)
+end
+
 function savewg(
         fdir::AbstractString,
         wg::Wikigraph
