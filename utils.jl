@@ -22,6 +22,7 @@ using JLD2, ProgressBars
 # Utility functions
 
 checkfile(f) = ispath(f) && rm(f)
+safemake(dir) = !ispath(dir) && mkdir(dir)
 safejoin(a, b) = replace(joinpath(a, b), "\\"=>"/")
 
 function normalise(title::String)
@@ -148,10 +149,14 @@ end
 function saveLinks(
         fpath::AbstractString,
         links::Vector{Vector{Pair{Int32, Int32}}},
-        pm::Pageman
+        pm::Pageman;
+        logdir::AbstractString="logs/"
     )
 
     checkfile(fpath)
+
+    safemake(logdir)
+    logfile = joinpath(logdir, "link-saving.txt")
 
     open(fpath, "a") do f
         for i::Int32 in ProgressBar(1:length(links))
@@ -160,7 +165,12 @@ function saveLinks(
             for (t, w) in links[i]
                 r = traceRedir!(pm, t)
                 if r == 0
-                    println("!Redirect loop! Link $(i)->$(t) ignored.")
+                    open(logfile, "a") do lf
+                        write(
+                            lf, 
+                            "Redirect loop: Link from $(i) ($(fwg.pm.id2title[i])) -> $(t) ($(fwg.pm.id2title[t])) ignored.\n"
+                        )
+                    end
                 elseif r ∉ written
                     write(f, r, w, Int32(0))
                     push!(written, r)
