@@ -68,7 +68,7 @@ function notRedir(
         pm::Pageman,
         id::Integer
     )
-    return (wg.pm.redirs[id] == id) # || (length(wg.links[id]) > 0)
+    return (pm.redirs[id] == id) # || (length(wg.links[id]) > 0)
 end
 
 function traceRedir!(
