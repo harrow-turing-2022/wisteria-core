@@ -1,6 +1,8 @@
 # Wisteria Core
 
-_Project Wisteria's core graph generation, serialisation, and analysis tools_
+| [Paper](https://ieeexplore.ieee.org/document/10229390) | [Citation](#citation) | [License](#license) |
+
+Project Wisteria's core graph generation, serialisation, and analysis tools, for the paper "Large-Scale Analysis of Wikipedia’s Link Structure and its Applications in Learning Path Construction", Y. Song and C. H. Leung, 2023 IEEE 24th International Conference on Information Reuse and Integration for Data Science (IRI), Bellevue, WA, USA, 2023, pp. 254-260 [[doi: 10.1109/IRI58017.2023.00051](https://doi.org/10.1109/IRI58017.2023.00051)].
 
 > Table of contents:
 >
@@ -9,6 +11,8 @@ _Project Wisteria's core graph generation, serialisation, and analysis tools_
 > - [Reusing Graphs](#reusing-graphs)
 > - [File Structure](#file-structure)
 > - [Wikigraph Docs](#wikigraph-docs)
+> - [Citation](#citation)
+> - [License](#license)
 
 ## Getting Started
 
@@ -145,6 +149,21 @@ for (id, weight) in wg.links[1]
         println("Connected to ", redirected_id, " with weight ", weight)
     end
 end
+```
+
+## Citation
+
+If you found our work helpful, here is our citation:
+
+```bibtex
+@INPROCEEDINGS{song2023large,
+  author={Song, Yiding and Leung, Chun Hei},
+  booktitle={2023 IEEE 24th International Conference on Information Reuse and Integration for Data Science (IRI)}, 
+  title={Large-Scale Analysis of Wikipedia’s Link Structure and its Applications in Learning Path Construction}, 
+  year={2023},
+  pages={254-260},
+  doi={10.1109/IRI58017.2023.00051}
+}
 ```
 
 ## License
