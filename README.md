@@ -18,7 +18,7 @@ Project Wisteria's core Wikipedia link graph generation, serialisation, and anal
 
 1. Make sure you have Julia installed and accessible via the command line. If not, [install Julia](https://julialang.org/downloads/). This code has been tested with Julia 1.7.3.
 
-2. If Windows, make sure you have the [`curl`](https://curl.se/windows/) and [`7z`](https://www.7-zip.org/download.html) commands available on command line. To add the `7z` command provided by 7zip, download [7zr.exe](https://www.7-zip.org/a/7zr.exe), rename it 7z.exe, and add it to PATH.
+2. If on Windows, make sure you have the [`curl`](https://curl.se/windows/) and [`7z`](https://www.7-zip.org/download.html) commands available on your command line. To add the `7z` command provided by 7zip, download [7zr.exe](https://www.7-zip.org/a/7zr.exe), rename it 7z.exe, and add it to PATH.
 
 3. Open your Julia terminal and run the setup script to get started:
 
@@ -28,7 +28,7 @@ Project Wisteria's core Wikipedia link graph generation, serialisation, and anal
 
    Internet connection is required to automatically download and extract the necessary Wikipedia dump files for Wisteria to work correctly.
 
-4. to extract link relationships between Wikipedia articles, run the command:
+4. To extract link relationships between Wikipedia articles, run the command:
 
    ```bash
    julia run.jl
@@ -36,7 +36,7 @@ Project Wisteria's core Wikipedia link graph generation, serialisation, and anal
 
    An Internet connection is required as Wikipedia dumps will be downloaded, unzipped, and deleted on the fly to save storage space.
 
-   - If, for any reason, your link extraction is incomplete, you can go into `./logs` to find out the last complete parsing of a data dump (there are 63 dumps to be parsed in total). Each log file is saved under the index of its dump (i.e. logs for dump index 1 is stored under `./logs/1`).
+   - If, for any reason, your link extraction is incomplete, you can go into `./logs` to find out the last complete parsing of a data dump (there are 63 dumps to be parsed in total). Each log file is saved under the index of its dump (i.e. logs for dump index 1 are stored under `./logs/1`).
 
      A completely parsed dump will generate something like the following at the end of `title_errors.txt`:
 
@@ -54,12 +54,12 @@ Project Wisteria's core Wikipedia link graph generation, serialisation, and anal
      julia run.jl 21
      ```
 
-5. We use `PyPlot.jl` to generate graphs for our experiments. This relies on an existing Python interpreter with `matplotlib` installed. To run our experiments, please first [install Python](https://www.python.org/downloads/) and add the matplotlib package using `pip install matplotlib`.
+5. We use `PyPlot.jl` to generate graphs for our experiments. This relies on an existing Python interpreter with `matplotlib` installed. To run our experiments, please first [install Python](https://www.python.org/downloads/) and add the `matplotlib` package using `pip install matplotlib`.
 
 6. To run `experiments/indexStats.jl`, you will need the GitHub version of `Pingouin.jl`. Enter package manager mode in Julia by pressing`]`, and run:
-```
-add https://github.com/clementpoiret/Pingouin.jl.git
-```
+   ```
+   add https://github.com/clementpoiret/Pingouin.jl.git
+   ```
 
 ## Important Notes
 
