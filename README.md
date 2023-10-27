@@ -2,7 +2,7 @@
 
 | [Paper](https://ieeexplore.ieee.org/document/10229390) | [Citation](#citation) | [License](#license) |
 
-Project Wisteria's core graph generation, serialisation, and analysis tools, for the paper "Large-Scale Analysis of Wikipedia’s Link Structure and its Applications in Learning Path Construction", Y. Song and C. H. Leung, 2023 IEEE 24th International Conference on Information Reuse and Integration for Data Science (IRI), Bellevue, WA, USA, 2023, pp. 254-260 [[doi: 10.1109/IRI58017.2023.00051](https://doi.org/10.1109/IRI58017.2023.00051)].
+Project Wisteria's core Wikipedia link graph generation, serialisation, and analysis tools. This is developed for the paper "Large-Scale Analysis of Wikipedia’s Link Structure and its Applications in Learning Path Construction", by Y. Song and C. H. Leung, published at the 2023 IEEE 24th International Conference on Information Reuse and Integration for Data Science (IRI), Bellevue, WA, USA [[doi: 10.1109/IRI58017.2023.00051](https://doi.org/10.1109/IRI58017.2023.00051)].
 
 > Table of contents:
 >
